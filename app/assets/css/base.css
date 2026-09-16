@@ -1,0 +1,220 @@
+/**
+ * Base element styles and the box-drawing helpers the TUI look is built from.
+ * Rules and frames are CSS borders/pseudo-elements, not literal glyphs, so they
+ * never break on wrap (CLAUDE.md "TUI rules").
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Reserve the scrollbar so switching tabs never shifts layout. */
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 {
+  font-size: inherit;
+  font-weight: 600;
+  margin: 0;
+}
+
+p { margin: 0 0 0.75rem; }
+p:last-child { margin-bottom: 0; }
+
+ul, ol, dl, dd { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+
+a {
+  color: var(--link);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+a:hover { text-decoration-thickness: 2px; }
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Visible focus ring on everything interactive. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── utilities ──────────────────────────────────────────────────────────── */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.measure { max-width: var(--measure); }
+
+/* Decorative glyph: always paired with aria-hidden in markup. Uses --muted,
+   not --line: it is still visible text, so it has to clear AA contrast. */
+.glyph {
+  color: var(--muted);
+  user-select: none;
+}
+
+/* ── box drawing ────────────────────────────────────────────────────────── */
+
+/**
+ * Inline-titled rule: ──── title ────
+ * A flex row where the lines are borders, so the title never wraps the frame.
+ */
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0.875rem;
+  color: var(--muted);
+}
+.rule::before,
+.rule::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--line);
+}
+.rule::before { flex: 0 0 2ch; }
+
+/**
+ * Leader-dot row: label ········ value
+ * The filler is a dotted bottom border on a flex spacer.
+ */
+.leader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.leader__fill {
+  flex: 1;
+  border-bottom: 1px dotted var(--line);
+  transform: translateY(-0.25em);
+  min-width: 1ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/**
+ * Progressive enhancement: controls whose only behaviour is JavaScript stay
+ * hidden when JavaScript is unavailable, so a no-JS visitor is never shown a
+ * control that does nothing. Keyboard shortcuts are unavailable in that state
+ * too, so nothing is lost.
+ *
+ * `data-js` is set by the inline script in app.vue before first paint, not on
+ * mount — flipping it after hydration would shift the layout (CLS).
+ */
+:root:not([data-js]) .js-only {
+  display: none !important;
+}
+
+/* ── frame ──────────────────────────────────────────────────────────────── */
+
+/**
+ * A single continuous frame with labels inset into the border line: the tab bar
+ * straddles the top edge and the status line straddles the bottom, the way the
+ * reference terminal UI does.
+ *
+ * Technique ported from WebTUI's `box-="square" shear-="both"`
+ * (MIT, webtui.ironclad.sh) rather than taken as a dependency — it is the one
+ * utility we wanted from a pre-1.0 library, and it is ~20 lines.
+ *
+ * The border is a pseudo-element inset by half a row top and bottom; the bars
+ * that cross it carry the surface background, so they mask the line behind
+ * them. No literal box-drawing characters, so the frame cannot break on wrap.
+ */
+.frame {
+  --frame-row: 2rem;
+  position: relative;
+  /* Stacking context: the z-index:-1 border then paints above the frame's own
+     background but still behind the content. */
+  isolation: isolate;
+  background: var(--surface);
+}
+
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--frame-row) / 2) 0;
+  border: 1px solid var(--line);
+  z-index: -1;
+}
+
+/*
+ * A bar that straddles the border line, at the top or the bottom of the frame.
+ * Narrow screens step the type down: four tab labels plus the resume link need
+ * ~50 characters, which does not fit at 13px on a 360px screen.
+ */
+.frame__bar {
+  display: flex;
+  align-items: center;
+  height: var(--frame-row);
+  padding: 0 1ch;
+  font-size: 0.6875rem;
+}
+
+/**
+ * Masks the border line behind it, so the group reads as inset into the frame.
+ * Gaps between labels deliberately leave the line showing through.
+ */
+.frame__label {
+  background: var(--surface);
+  padding: 0 0.5ch;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* Transparent stretch: lets the border line show between labels. */
+.frame__gap {
+  flex: 1;
+  min-width: 1ch;
+}
+
+.frame__body {
+  padding: 0.75rem 1.75ch 1.25rem;
+}
+
+@media (min-width: 40rem) {
+  .frame__bar {
+    padding: 0 2ch;
+    font-size: var(--text-status);
+  }
+  .frame__label { padding: 0 0.75ch; }
+  .frame__body { padding: 1rem 2.25ch 1.5rem; }
+}

@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+
+# nuxt
+.nuxt
+.nitro
+.cache
+.output
+.data
+dist
+
+# env
+.env
+.env.*
+!.env.example
+
+# testing
+playwright-report
+test-results
+coverage
+.lighthouseci
+
+# editors / os
+.DS_Store
+.idea
+*.log

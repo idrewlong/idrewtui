@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/**
+ * Design tokens — docs/PROJECT.md §5.
+ * Components use var(--token) or the Tailwind aliases below. Never raw hex.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Dark theme (default): Gulf Coast at night + amber phosphor. */
+  --bg: #161B26;
+  --surface: #1E2433;
+  --line: #323B52;
+  --fg: #DCD7C9;
+  --muted: #8C93A6;
+  --accent: #F2B544;
+  --link: #6CC0B4;
+  --danger: #E0786D;
+
+  --theme-name: "gulf-night";
+
+  /* Type scale (rem) */
+  --text-status: 0.8125rem;
+  --text-body: 0.9375rem;
+  --text-prompt: 1rem;
+  --text-name: 1.25rem;
+
+  --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Layout */
+  --pane-width: 88ch;
+  --measure: 80ch;
+}
+
+/* Light "paper" theme. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #EFEAE0;
+  --surface: #E4DED1;
+  --line: #C6BEAD;
+  --fg: #1F2430;
+  --muted: #5B6170;
+  --accent: #885508;
+  --link: #1B6C62;
+  --danger: #A33227;
+  --theme-name: "paper";
+}
+
+/* First visit with no stored choice follows the OS. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #EFEAE0;
+    --surface: #E4DED1;
+    --line: #C6BEAD;
+    --fg: #1F2430;
+    --muted: #5B6170;
+    --accent: #885508;
+    --link: #1B6C62;
+    --danger: #A33227;
+    --theme-name: "paper";
+  }
+}
+
+/* Expose tokens to Tailwind utilities (bg-bg, text-muted, border-line, ...). */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-link: var(--link);
+  --color-danger: var(--danger);
+  --font-mono: var(--font-mono);
+}
