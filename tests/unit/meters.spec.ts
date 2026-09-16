@@ -1,5 +1,34 @@
 import { describe, expect, it } from 'vitest'
 import { formatFps, pushSample } from '../../app/composables/useFrameRate'
+import { bytesToMb } from '../../app/composables/useMemoryMeter'
+import { formatRtt } from '../../app/composables/useNetworkInfo'
+
+describe('bytesToMb', () => {
+  it('converts bytes to whole megabytes', () => {
+    expect(bytesToMb(10 * 1048576)).toBe(10)
+  })
+
+  it('rounds to the nearest whole megabyte', () => {
+    expect(bytesToMb(10.6 * 1048576)).toBe(11)
+    expect(bytesToMb(10.4 * 1048576)).toBe(10)
+  })
+})
+
+describe('formatRtt', () => {
+  it('renders "<25ms" for a 0 reading rather than claiming false precision', () => {
+    // navigator.connection.rtt is quantised to 25ms steps, so 0 means
+    // "under 25ms", not "zero latency".
+    expect(formatRtt(0)).toBe('<25ms')
+  })
+
+  it('renders an ordinary reading as-is', () => {
+    expect(formatRtt(75)).toBe('75ms')
+  })
+
+  it('renders an em dash when genuinely unavailable', () => {
+    expect(formatRtt(null)).toBe('—')
+  })
+})
 
 describe('formatFps', () => {
   it('shows an em dash before any sample has landed, not a fabricated number', () => {

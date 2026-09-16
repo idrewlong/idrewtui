@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useBattery } from '~/composables/useBattery'
 import { formatFps, useFrameRate } from '~/composables/useFrameRate'
 import { useMemoryMeter } from '~/composables/useMemoryMeter'
-import { useNetworkInfo } from '~/composables/useNetworkInfo'
+import { formatRtt, useNetworkInfo } from '~/composables/useNetworkInfo'
 
 /**
  * Live browser-side telemetry. Deliberately not a fake CPU meter: the platform
@@ -43,7 +43,7 @@ const batteryLine = computed(() =>
       <dt>heap</dt>
       <dd>
         <template v-if="memory.supported.value && memory.usedMb.value !== null">
-          <TuiBarMeter :fraction="memory.fraction.value" label="Allocated JS heap in use" /> {{ memory.usedMb.value }}M
+          <TuiSparkline :values="memory.history.value" unit="MB" /> {{ memory.usedMb.value }}M
         </template>
         <span v-else-if="memory.supported.value" class="kv__none">—</span>
         <span v-else class="kv__none">— unavailable</span>
@@ -53,7 +53,7 @@ const batteryLine = computed(() =>
       <dd>{{ netLine }}</dd>
 
       <dt>rtt</dt>
-      <dd>{{ net.rtt.value !== null ? `${net.rtt.value}ms` : '—' }}</dd>
+      <dd>{{ formatRtt(net.rtt.value) }}</dd>
 
       <dt>batt</dt>
       <dd :class="{ kv__none: batteryLine === '—' }">{{ batteryLine }}</dd>

@@ -7,6 +7,18 @@ interface NetworkInformation extends EventTarget {
 }
 
 /**
+ * Render helper for `rtt`. `navigator.connection.rtt` is quantised to 25ms
+ * steps, so a reading of `0` doesn't mean zero latency — it means "under
+ * 25ms" — and rendering it as a bare `0ms` would claim a precision the API
+ * doesn't provide.
+ */
+export function formatRtt(rtt: number | null): string {
+  if (rtt === null) return '—'
+  if (rtt === 0) return '<25ms'
+  return `${rtt}ms`
+}
+
+/**
  * Connection quality from the Network Information API (Chromium) plus online
  * state, which every browser reports. Values update live as the connection
  * changes.
