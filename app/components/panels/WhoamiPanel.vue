@@ -13,7 +13,7 @@ const certLine = certifications
 </script>
 
 <template>
-  <TuiPanel title="whoami" :rows="6">
+  <TuiPanel title="whoami" :rows="7">
     <dl class="kv">
       <dt>Role</dt><dd>{{ profile.role }}</dd>
       <dt>Org</dt><dd>{{ profile.employer }}</dd>
