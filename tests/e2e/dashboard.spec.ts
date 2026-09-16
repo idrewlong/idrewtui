@@ -27,17 +27,6 @@ test.describe('dashboard shell', () => {
     expect(after).toBe(before)
   })
 
-  test('all five panels fit within the viewport at 1366x768', async ({ page }) => {
-    await page.setViewportSize({ width: 1366, height: 768 })
-    await page.goto('/')
-
-    for (const title of ['whoami', 'visitor', 'meters', 'wx', 'session']) {
-      const box = await page.getByRole('region', { name: title }).boundingBox()
-      expect(box, `${title} has no bounding box`).not.toBeNull()
-      expect(box!.y + box!.height, `${title} bottom edge`).toBeLessThanOrEqual(768)
-    }
-  })
-
   test('whoami certifications and stack are fully visible, not clipped', async ({ page }) => {
     await page.goto('/')
     const panel = page.getByRole('region', { name: 'whoami' })

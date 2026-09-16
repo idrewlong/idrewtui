@@ -13,12 +13,13 @@ import { track } from '~/utils/analytics'
  * 1366/1920) rather than clipping it; the panel is fully prerendered and
  * never changes after hydration, so a taller fixed height costs zero CLS.
  *
- * The ASCII mark is hidden below 90rem: at every grid column width this
- * panel occupies up to that point, showing it would either stack above the
+ * The ASCII mark is hidden below 75rem (the 3-column breakpoint, and below
+ * a normal laptop's width) and shown from it — the project owner asked for
+ * it, so it needs to be visible at an ordinary 1366px-wide viewport, not
+ * just on very wide screens. Below 75rem it would either stack above the
  * key/value list (costing extra fixed-height rows on every width, not just
- * the one that needs them) or sit beside it and squeeze it back toward the
- * truncation this component exists to avoid. It only appears once the panel
- * is wide enough to hold both without touching the required `rows`.
+ * the one that needs them) or sit beside it and squeeze the column; values
+ * wrap rather than truncate, so that squeeze is a wrap, not a clip.
  */
 const certLine = certifications
   .map(c => (c.status === 'in-progress' ? `${c.name} (in progress)` : c.name))
@@ -26,7 +27,7 @@ const certLine = certifications
 </script>
 
 <template>
-  <TuiPanel title="whoami" :rows="14">
+  <TuiPanel title="whoami" :rows="16">
     <div class="whoami">
       <TuiAsciiArt class="whoami__art" />
 
@@ -63,12 +64,15 @@ const certLine = certifications
 
 /* Hidden below the width where it would stack above the key/value list and
    cost extra fixed-height rows, or sit beside it and squeeze it back toward
-   truncation. Shown only once the panel is comfortably wide. */
+   truncation. Shown from 75rem: the 3-column breakpoint, and the narrowest
+   width a normal laptop (1366px wide) actually renders this panel at.
+   Values wrap now, so a narrower key/value column here is a wrap, not a
+   clip. */
 .whoami__art { display: none; }
 
 .whoami__info { min-width: 0; }
 
-@media (min-width: 90rem) {
+@media (min-width: 75rem) {
   .whoami__art { display: block; flex: 0 0 auto; }
   .whoami__info { flex: 1 1 16rem; }
 }
