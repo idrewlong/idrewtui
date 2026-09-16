@@ -6,17 +6,27 @@ export function pushSample(history: number[], value: number, max: number): numbe
 }
 
 /**
+ * Render helper: distinguishes "no sample has landed yet" (`null`) from a
+ * genuine 0fps reading. A main thread blocked for a full measurement window
+ * produces a real, measured `0` — that's the no-fabrication rule running
+ * backwards: hiding a real bad reading would be worse than showing it.
+ */
+export function formatFps(fps: number | null): string {
+  return fps === null ? '—' : String(fps)
+}
+
+/**
  * Real frame rate, measured by counting requestAnimationFrame callbacks over a
  * one-second window. This is one of the few genuinely live signals the browser
  * offers, which is why it earns a place in the meters panel.
  *
  * Pauses when the tab is hidden (a backgrounded tab is throttled to ~1fps and
  * would otherwise show a misleading crash) and freezes under reduced motion —
- * in that case it never starts, so `fps`/`history` stay at their zero/empty
- * initial values and the panel renders `—`.
+ * in that case it never starts, so `fps` stays `null` (no sample yet — see
+ * `formatFps`) and `history` stays empty.
  */
 export function useFrameRate(samples = 24) {
-  const fps = ref(0)
+  const fps = ref<number | null>(null)
   const history = ref<number[]>([])
 
   let raf = 0

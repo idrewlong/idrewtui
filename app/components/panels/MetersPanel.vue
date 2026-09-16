@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useBattery } from '~/composables/useBattery'
-import { useFrameRate } from '~/composables/useFrameRate'
+import { formatFps, useFrameRate } from '~/composables/useFrameRate'
 import { useMemoryMeter } from '~/composables/useMemoryMeter'
 import { useNetworkInfo } from '~/composables/useNetworkInfo'
 
@@ -38,13 +38,14 @@ const batteryLine = computed(() =>
   <TuiPanel title="meters" :rows="6">
     <dl class="kv">
       <dt>fps</dt>
-      <dd><TuiSparkline :values="history" unit="fps" :min="0" :max="120" /> {{ fps || '—' }}</dd>
+      <dd><TuiSparkline :values="history" unit="fps" :min="0" :max="120" /> {{ formatFps(fps) }}</dd>
 
       <dt>heap</dt>
       <dd>
-        <template v-if="memory.supported.value">
-          <TuiBarMeter :fraction="memory.fraction.value" label="JS heap used" /> {{ memory.usedMb.value }}M
+        <template v-if="memory.supported.value && memory.usedMb.value !== null">
+          <TuiBarMeter :fraction="memory.fraction.value" label="Allocated JS heap in use" /> {{ memory.usedMb.value }}M
         </template>
+        <span v-else-if="memory.supported.value" class="kv__none">—</span>
         <span v-else class="kv__none">— unavailable</span>
       </dd>
 

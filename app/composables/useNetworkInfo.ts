@@ -6,19 +6,19 @@ interface NetworkInformation extends EventTarget {
   rtt?: number
 }
 
-/** How often to re-probe latency when `navigator.connection.rtt` is unavailable. */
-const PROBE_INTERVAL_MS = 30_000
-
 /**
  * Connection quality from the Network Information API (Chromium) plus online
  * state, which every browser reports. Values update live as the connection
  * changes.
  *
- * Latency prefers `connection.rtt` — a round-trip estimate the browser already
- * tracks, at zero cost. Only when that is unavailable do we fall back to an
- * actual timed same-origin request, and even then infrequently (every 30s),
- * paused while the tab is hidden and cancelled on unmount, so this never
- * becomes a polling meter that hammers the network to draw one row.
+ * Latency is `connection.rtt` only — a round-trip estimate the browser
+ * already tracks, at zero cost. There is deliberately no request-based
+ * fallback here: the design spec reserves network requests to the weather
+ * panel alone ("only this panel makes a network request"), and a probe fired
+ * from here would land precisely on the browsers that lack
+ * `navigator.connection` (Safari, Firefox) — exactly the users who should get
+ * an honest `—` instead of extra background traffic. When `rtt` is
+ * unavailable it just stays `null`, and the panel renders `—`.
  */
 export function useNetworkInfo() {
   const effectiveType = ref<string | null>(null)
@@ -28,8 +28,6 @@ export function useNetworkInfo() {
   const supported = ref(false)
 
   let connection: NetworkInformation | undefined
-  let probeTimer: ReturnType<typeof setInterval> | undefined
-  let controller: AbortController | undefined
 
   function read() {
     if (!connection) return
@@ -38,33 +36,7 @@ export function useNetworkInfo() {
     rtt.value = connection.rtt ?? null
   }
 
-  async function probeLatency() {
-    // Only probe when the API gave us nothing to work with, never stack probes
-    // on top of each other, and never spend a background tab's throttled cycles
-    // on a request nobody can see the result of.
-    if (rtt.value !== null || controller || document.hidden) return
-    controller = new AbortController()
-    const start = performance.now()
-    try {
-      await fetch(document.location.href, { method: 'HEAD', cache: 'no-store', signal: controller.signal })
-      rtt.value = Math.round(performance.now() - start)
-    }
-    catch {
-      // Offline, aborted, or blocked — leave rtt as unavailable rather than guessing.
-    }
-    finally {
-      controller = undefined
-    }
-  }
-
   function onOnline() { online.value = navigator.onLine }
-
-  // Coming back from a hidden tab shouldn't mean waiting up to 30s for the
-  // next scheduled probe — try immediately (probeLatency is itself a no-op
-  // once rtt is known, so this is free once a value has landed).
-  function onVisibility() {
-    if (!document.hidden) void probeLatency()
-  }
 
   onMounted(() => {
     connection = (navigator as Navigator & { connection?: NetworkInformation }).connection
@@ -74,21 +46,12 @@ export function useNetworkInfo() {
     connection?.addEventListener('change', read)
     window.addEventListener('online', onOnline)
     window.addEventListener('offline', onOnline)
-
-    if (rtt.value === null) {
-      document.addEventListener('visibilitychange', onVisibility)
-      void probeLatency()
-      probeTimer = setInterval(() => void probeLatency(), PROBE_INTERVAL_MS)
-    }
   })
 
   onBeforeUnmount(() => {
     connection?.removeEventListener('change', read)
     window.removeEventListener('online', onOnline)
     window.removeEventListener('offline', onOnline)
-    document.removeEventListener('visibilitychange', onVisibility)
-    clearInterval(probeTimer)
-    controller?.abort()
   })
 
   return { effectiveType, downlink, rtt, online, supported }

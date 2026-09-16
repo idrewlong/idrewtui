@@ -1,5 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { pushSample } from '../../app/composables/useFrameRate'
+import { formatFps, pushSample } from '../../app/composables/useFrameRate'
+
+describe('formatFps', () => {
+  it('shows an em dash before any sample has landed, not a fabricated number', () => {
+    expect(formatFps(null)).toBe('—')
+  })
+
+  it('shows a genuine zero reading rather than masking it as "no data"', () => {
+    // e.g. the main thread was blocked for a whole measurement window — a
+    // real, measured 0, and hiding it would be worse than showing it.
+    expect(formatFps(0)).toBe('0')
+  })
+
+  it('shows an ordinary measured rate', () => {
+    expect(formatFps(60)).toBe('60')
+  })
+})
 
 describe('pushSample', () => {
   it('appends while under the cap', () => {
