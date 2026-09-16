@@ -42,9 +42,10 @@ test.describe('keyboard navigation', () => {
     await expect(page.getByRole('dialog')).toBeHidden()
   })
 
-  test('t toggles the theme and persists it', async ({ page }) => {
+  test('t cycles the theme and persists it', async ({ page }) => {
     await gotoHydrated(page, '/')
     const before = await page.locator('html').getAttribute('data-theme')
+    expect(before).toBeTruthy()
 
     await page.keyboard.press('t')
     const after = await page.locator('html').getAttribute('data-theme')

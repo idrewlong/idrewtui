@@ -55,7 +55,7 @@ export const shortcuts: Shortcut[] = [
   { keys: ['f'], action: 'projects:filter', label: 'f', description: 'Cycle the project filter', group: 'actions' },
   { keys: ['r'], action: 'resume:open', label: 'r', description: 'Open the resume PDF', group: 'actions' },
   { keys: ['y'], action: 'email:copy', label: 'y', description: 'Copy email address', group: 'actions' },
-  { keys: ['t'], action: 'theme:toggle', label: 't', description: 'Toggle theme', group: 'actions' },
+  { keys: ['t'], action: 'theme:toggle', label: 't', description: 'Cycle theme', group: 'actions' },
   { keys: ['?'], action: 'help:toggle', label: '?', description: 'Show this help', group: 'actions' },
   { keys: ['Escape'], action: 'overlay:close', label: 'Esc', description: 'Close overlay or collapse', group: 'actions' },
 ]

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { THEME_STORAGE_KEY } from '~/composables/useTheme'
+import { DEFAULT_DARK, DEFAULT_LIGHT, THEME_NAMES, THEME_STORAGE_KEY } from '~/composables/useTheme'
 
 /**
  * Runs before first paint, because both things it sets would otherwise cause a
@@ -15,10 +15,10 @@ import { THEME_STORAGE_KEY } from '~/composables/useTheme'
  */
 const themeScript = `
 (function(){var d=document.documentElement;d.dataset.js='true';try{
+var names=${JSON.stringify(THEME_NAMES)};
 var s=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});
-var t=(s==='dark'||s==='light')?s:(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
-d.dataset.theme=t;
-}catch(e){}})();
+d.dataset.theme=names.indexOf(s)>-1?s:(matchMedia('(prefers-color-scheme: light)').matches?${JSON.stringify(DEFAULT_LIGHT)}:${JSON.stringify(DEFAULT_DARK)});
+}catch(e){d.dataset.theme=${JSON.stringify(DEFAULT_DARK)}}})();
 `.trim()
 
 useHead({

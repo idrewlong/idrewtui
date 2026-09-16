@@ -1,28 +1,52 @@
 import { describe, expect, it } from 'vitest'
-import { oppositeTheme, parseStoredTheme, resolveTheme } from '../../app/composables/useTheme'
+import { THEME_ORDER } from '../../scripts/generate-themes.mjs'
+import {
+  DEFAULT_DARK, DEFAULT_LIGHT, THEME_NAMES,
+  nextTheme, parseStoredTheme, resolveTheme,
+} from '../../app/composables/useTheme'
 import { wrapIndex } from '../../app/composables/useSelection'
 import { formatDate, formatMonth, formatRange, machineRange } from '../../app/utils/format'
 
 describe('theme resolution', () => {
+  it('lists tokyo-night first so it is the default and first in the cycle', () => {
+    expect(THEME_NAMES[0]).toBe('tokyo-night')
+    expect(DEFAULT_DARK).toBe('tokyo-night')
+  })
+
   it('prefers a stored choice over the OS setting', () => {
-    expect(resolveTheme('light', false)).toBe('light')
-    expect(resolveTheme('dark', true)).toBe('dark')
+    expect(resolveTheme('gruvbox', true)).toBe('gruvbox')
+    expect(resolveTheme('kanagawa', false)).toBe('kanagawa')
   })
 
   it('follows the OS when nothing is stored', () => {
-    expect(resolveTheme(null, true)).toBe('light')
-    expect(resolveTheme(null, false)).toBe('dark')
+    expect(resolveTheme(null, true)).toBe(DEFAULT_LIGHT)
+    expect(resolveTheme(null, false)).toBe(DEFAULT_DARK)
   })
 
-  it('falls back to dark when the stored value is junk', () => {
-    expect(resolveTheme('neon', false)).toBe('dark')
-    expect(parseStoredTheme('neon')).toBeNull()
+  it('falls back when the stored value is not a theme we ship', () => {
+    expect(resolveTheme('dracula', false)).toBe(DEFAULT_DARK)
+    expect(parseStoredTheme('dracula')).toBeNull()
     expect(parseStoredTheme(null)).toBeNull()
+    expect(parseStoredTheme('gruvbox')).toBe('gruvbox')
   })
 
-  it('toggles between exactly two themes', () => {
-    expect(oppositeTheme('dark')).toBe('light')
-    expect(oppositeTheme('light')).toBe('dark')
+  it('cycles through every theme and wraps', () => {
+    const seen = new Set<string>()
+    let current = THEME_NAMES[0]!
+    for (let i = 0; i < THEME_NAMES.length; i++) {
+      seen.add(current)
+      current = nextTheme(current)
+    }
+    expect(seen.size).toBe(THEME_NAMES.length)
+    expect(current).toBe(THEME_NAMES[0])
+  })
+
+  it('cycles from an unknown theme to the first rather than getting stuck', () => {
+    expect(nextTheme('dracula')).toBe(THEME_NAMES[0])
+  })
+
+  it('stays in sync with the generator, which emits the CSS these names select', () => {
+    expect([...THEME_NAMES]).toEqual(THEME_ORDER)
   })
 })
 

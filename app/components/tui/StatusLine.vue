@@ -21,7 +21,7 @@ defineProps<{
   theme: Theme
 }>()
 
-defineEmits<{ help: [], 'toggle-theme': [] }>()
+defineEmits<{ help: [], 'cycle-theme': [] }>()
 </script>
 
 <template>
@@ -47,11 +47,10 @@ defineEmits<{ help: [], 'toggle-theme': [] }>()
       <button
         type="button"
         class="status__btn js-only"
-        :aria-pressed="theme === 'light'"
-        @click="$emit('toggle-theme')"
+        @click="$emit('cycle-theme')"
       >
-        <span aria-hidden="true">{{ theme === 'light' ? '◐' : '◑' }}</span>
-        <span class="visually-hidden">Use {{ theme === 'light' ? 'dark' : 'light' }} theme</span>
+        <span aria-hidden="true">◑</span>
+        <span class="visually-hidden">Next colour theme (current: {{ theme }})</span>
       </button>
 
       <button type="button" class="status__btn js-only" @click="$emit('help')">

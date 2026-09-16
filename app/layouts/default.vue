@@ -18,7 +18,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { message, flash } = useStatusLine()
-const { theme, toggle: toggleTheme } = useTheme()
+const { theme, cycle: cycleTheme } = useTheme()
 const { copy } = useClipboard()
 
 const helpOpen = ref(false)
@@ -52,8 +52,8 @@ function openResume() {
   window.open(profile.resumeUrl, '_blank', 'noopener')
 }
 
-function onThemeToggle() {
-  const next = toggleTheme()
+function onThemeCycle() {
+  const next = cycleTheme()
   flash(`theme → ${next}`)
 }
 
@@ -99,7 +99,7 @@ useKeybindings({
 
   'resume:open': openResume,
   'email:copy': copyEmail,
-  'theme:toggle': onThemeToggle,
+  'theme:toggle': onThemeCycle,
   'help:toggle': () => { helpOpen.value = !helpOpen.value },
   'overlay:close': () => { helpOpen.value = false },
 
@@ -129,7 +129,7 @@ useKeybindings({
         :message="message"
         :theme="theme"
         @help="helpOpen = true"
-        @toggle-theme="onThemeToggle"
+        @cycle-theme="onThemeCycle"
       />
     </div>
 

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./themes.css";
 
 /**
  * Design tokens — docs/PROJECT.md §5.
@@ -6,20 +7,6 @@
  */
 
 :root {
-  color-scheme: dark;
-
-  /* Dark theme (default): Gulf Coast at night + amber phosphor. */
-  --bg: #161B26;
-  --surface: #1E2433;
-  --line: #323B52;
-  --fg: #DCD7C9;
-  --muted: #8C93A6;
-  --accent: #F2B544;
-  --link: #6CC0B4;
-  --danger: #E0786D;
-
-  --theme-name: "gulf-night";
-
   /* Type scale (rem) */
   --text-status: 0.8125rem;
   --text-body: 0.9375rem;
@@ -33,37 +20,7 @@
   --measure: 80ch;
 }
 
-/* Light "paper" theme. */
-:root[data-theme="light"] {
-  color-scheme: light;
-  --bg: #EFEAE0;
-  --surface: #E4DED1;
-  --line: #C6BEAD;
-  --fg: #1F2430;
-  --muted: #5B6170;
-  --accent: #885508;
-  --link: #1B6C62;
-  --danger: #A33227;
-  --theme-name: "paper";
-}
-
-/* First visit with no stored choice follows the OS. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    color-scheme: light;
-    --bg: #EFEAE0;
-    --surface: #E4DED1;
-    --line: #C6BEAD;
-    --fg: #1F2430;
-    --muted: #5B6170;
-    --accent: #885508;
-    --link: #1B6C62;
-    --danger: #A33227;
-    --theme-name: "paper";
-  }
-}
-
-/* Expose tokens to Tailwind utilities (bg-bg, text-muted, border-line, ...). */
+/* Colour tokens themselves live in the generated themes.css. */
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
