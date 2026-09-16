@@ -13,8 +13,14 @@ export const THEME_NAMES = [
 
 export type Theme = typeof THEME_NAMES[number]
 
+/**
+ * The first dark/light theme in cycle order — same rule generate-themes.mjs
+ * uses to pick the CSS defaults (bare `:root` and the prefers-color-scheme
+ * block). Hardcoded here because a client bundle can't import the generator;
+ * kept honest by the sync test below.
+ */
 export const DEFAULT_DARK: Theme = 'tokyo-night'
-export const DEFAULT_LIGHT: Theme = 'catppuccin-latte'
+export const DEFAULT_LIGHT: Theme = 'rose-pine'
 export const THEME_STORAGE_KEY = 'idrewlong:theme'
 
 /** A stored value is only trusted when it names a theme we actually ship. */

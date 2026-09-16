@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { THEME_ORDER } from '../../scripts/generate-themes.mjs'
+import { generateThemes, THEME_ORDER } from '../../scripts/generate-themes.mjs'
 import {
   DEFAULT_DARK, DEFAULT_LIGHT, THEME_NAMES,
   nextTheme, parseStoredTheme, resolveTheme,
@@ -47,6 +47,14 @@ describe('theme resolution', () => {
 
   it('stays in sync with the generator, which emits the CSS these names select', () => {
     expect([...THEME_NAMES]).toEqual(THEME_ORDER)
+  })
+
+  it('defaults match the first dark and first light theme the generator emits', () => {
+    const generated = generateThemes()
+    const firstDark = generated.find(t => t.mode === 'dark')!.name
+    const firstLight = generated.find(t => t.mode === 'light')!.name
+    expect(DEFAULT_DARK).toBe(firstDark)
+    expect(DEFAULT_LIGHT).toBe(firstLight)
   })
 })
 
