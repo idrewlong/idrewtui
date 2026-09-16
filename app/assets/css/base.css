@@ -250,12 +250,31 @@ button {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       "whoami  visitor"
-      "meters  session"
+      "meters  meters"
       "content content"
-      "wx      wx";
+      "wx      session";
   }
 }
 
+/**
+ * At this width the whole dashboard fits one viewport; the content region
+ * scrolls internally instead (see `.dash__content`/`main` in
+ * layouts/default.vue). This needs a *definite* `height`, not `min-height`:
+ * `fr` tracks only absorb leftover space when the grid container's own size
+ * is definite — with only `min-height` set, Chromium/Firefox size the middle
+ * row to its content instead of to the leftover space, which is exactly the
+ * bug this replaced (wx/session landing hundreds of px below the fold).
+ *
+ * `minmax(0, 1fr)`, not a larger floor: at the 1366x768 test viewport,
+ * whoami's own required height (see WhoamiPanel.vue — tall enough that its
+ * wrapped certifications never clip) plus wx/session already consume ~600px
+ * of the 768px budget, leaving ~166px for this row — under the 18rem/288px
+ * floor a short-viewport fallback would want. A real floor here would push
+ * the total past `height` and make the *whole page* scroll at 1366x768,
+ * which fails the "all five panels fit" requirement outright. `main`'s own
+ * `overflow-y: auto` plus the tab bar/status line's fixed 2rem bars are the
+ * practical floor instead.
+ */
 @media (min-width: 75rem) {
   .dash {
     grid-template-columns: 1fr 1fr 1fr;
@@ -263,5 +282,7 @@ button {
       "whoami  visitor  meters"
       "content content  content"
       "wx      wx       session";
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: calc(100dvh - 5rem);
   }
 }

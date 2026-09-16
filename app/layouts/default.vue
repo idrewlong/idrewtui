@@ -124,7 +124,14 @@ useKeybindings({
         <TuiTabBar />
 
         <TuiPane>
-          <main id="main" tabindex="-1">
+          <!--
+            tabindex="0", not "-1": at >=75rem this is the scroll container
+            (see the media query below), and axe's scrollable-region-focusable
+            flags routes whose main has no focusable descendant of its own
+            (e.g. /skills — a prompt plus a plain list, no links or buttons).
+            The skip link still works: href="#main" moves focus here either way.
+          -->
+          <main id="main" tabindex="0">
             <slot />
           </main>
         </TuiPane>
@@ -178,5 +185,33 @@ main:focus { outline: none; }
 
 @media (min-width: 40rem) {
   .shell { padding: 2rem 1rem 3rem; }
+}
+
+/**
+ * >=75rem: the dashboard fits one viewport (see `.dash` in base.css) and
+ * this region is the part that scrolls. `min-height: 0` on both the grid
+ * item and the flex item below it is required — without it a flex/grid
+ * item refuses to shrink below its content size and the scroll container
+ * never gets a bounded height to scroll within.
+ */
+@media (min-width: 75rem) {
+  .dash__content {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .frame__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
 }
 </style>

@@ -26,4 +26,54 @@ test.describe('dashboard shell', () => {
     const after = (await panel.boundingBox())!.height
     expect(after).toBe(before)
   })
+
+  test('all five panels fit within the viewport at 1366x768', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 768 })
+    await page.goto('/')
+
+    for (const title of ['whoami', 'visitor', 'meters', 'wx', 'session']) {
+      const box = await page.getByRole('region', { name: title }).boundingBox()
+      expect(box, `${title} has no bounding box`).not.toBeNull()
+      expect(box!.y + box!.height, `${title} bottom edge`).toBeLessThanOrEqual(768)
+    }
+  })
+
+  test('whoami certifications and stack are fully visible, not clipped', async ({ page }) => {
+    await page.goto('/')
+    const panel = page.getByRole('region', { name: 'whoami' })
+
+    // Full text present — not just in the DOM, but rendered.
+    const text = await panel.innerText()
+    expect(text).toContain('CompTIA Security+ (SY0-701)')
+    expect(text).toContain('AWS Solutions Architect')
+    expect(text).toContain('Associate')
+    expect(text).toContain('FAA Part 107 Remote Pilot')
+
+    // Rendered, not merely present: the fixed-height body must not clip its
+    // content (a clipped element can still pass a `toContainText` check).
+    const overflow = await panel.locator('.panel__body').evaluate(el => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    }))
+    expect(overflow.scrollHeight, 'whoami body overflows vertically').toBeLessThanOrEqual(overflow.clientHeight)
+    expect(overflow.scrollWidth, 'whoami body overflows horizontally').toBeLessThanOrEqual(overflow.clientWidth)
+  })
+
+  test('whoami stack does not clip at the 768px (md) breakpoint', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 })
+    await page.goto('/')
+    const panel = page.getByRole('region', { name: 'whoami' })
+
+    const text = await panel.innerText()
+    expect(text).toContain('Laravel')
+    expect(text).toContain('Go')
+
+    const overflow = await panel.locator('.panel__body').evaluate(el => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+    }))
+    expect(overflow.scrollHeight).toBeLessThanOrEqual(overflow.clientHeight)
+  })
 })
