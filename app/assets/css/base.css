@@ -258,7 +258,7 @@ button {
 
 @media (min-width: 75rem) {
   .dash {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1.5fr 1fr 1fr;
     grid-template-areas:
       "whoami  visitor  meters"
       "content content  content"

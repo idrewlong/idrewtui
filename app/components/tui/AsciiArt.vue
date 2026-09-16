@@ -35,4 +35,11 @@ const mark = [
 @media (min-width: 40rem) {
   .art { font-size: 1rem; }
 }
+
+/* At >=75rem where the mark shows beside the whoami panel, use a smaller size
+   to fit it within the panel without forcing excessive text wrapping.
+   At 0.5rem, the mark occupies ~67px, reducing panel squeeze and content wrapping. */
+@media (min-width: 75rem) {
+  .art { font-size: 0.5rem; }
+}
 </style>

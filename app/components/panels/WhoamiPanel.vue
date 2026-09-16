@@ -27,7 +27,7 @@ const certLine = certifications
 </script>
 
 <template>
-  <TuiPanel title="whoami" :rows="16">
+  <TuiPanel title="whoami" :rows="12">
     <div class="whoami">
       <TuiAsciiArt class="whoami__art" />
 
