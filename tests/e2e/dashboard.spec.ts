@@ -75,6 +75,32 @@ test.describe('dashboard shell', () => {
     expect(overflow.scrollWidth, 'whoami body overflows horizontally').toBeLessThanOrEqual(overflow.clientWidth)
   })
 
+  test('meters panel is fully visible, not clipped, and does not resize on hydration', async ({ page }) => {
+    await page.goto('/')
+    const panel = page.getByRole('region', { name: 'meters' })
+
+    // Same fixed-height/CLS guard as the visitor and whoami panels: the
+    // meters panel ticks continuously after hydration (fps, heap, etc.), so
+    // this is the one place on the page where a height change would be
+    // easiest to miss — it must still hold across every subsequent tick.
+    const before = (await panel.boundingBox())!.height
+    await expect(page.locator('html')).toHaveAttribute('data-ready', 'true')
+    await page.waitForTimeout(1200)
+    const after = (await panel.boundingBox())!.height
+    expect(after).toBe(before)
+
+    // Rendered, not merely present: the fixed-height body must not clip its
+    // content now that live values have populated it.
+    const overflow = await panel.locator('.panel__body').evaluate(el => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    }))
+    expect(overflow.scrollHeight, 'meters body overflows vertically').toBeLessThanOrEqual(overflow.clientHeight)
+    expect(overflow.scrollWidth, 'meters body overflows horizontally').toBeLessThanOrEqual(overflow.clientWidth)
+  })
+
   test('whoami stack does not clip at the 768px (md) breakpoint', async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 })
     await page.goto('/')
