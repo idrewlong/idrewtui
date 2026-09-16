@@ -101,6 +101,56 @@ test.describe('dashboard shell', () => {
     expect(overflow.scrollWidth, 'meters body overflows horizontally').toBeLessThanOrEqual(overflow.clientWidth)
   })
 
+  test('session panel is fully visible, not clipped, and does not resize on hydration', async ({ page }) => {
+    await page.goto('/')
+    const panel = page.getByRole('region', { name: 'session' })
+
+    // Same fixed-height/CLS guard as meters: the clock and uptime tick every
+    // second after hydration, so the height must hold across ticks too.
+    const before = (await panel.boundingBox())!.height
+    await expect(page.locator('html')).toHaveAttribute('data-ready', 'true')
+    await page.waitForTimeout(1200)
+    const after = (await panel.boundingBox())!.height
+    expect(after).toBe(before)
+
+    const overflow = await panel.locator('.panel__body').evaluate(el => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    }))
+    expect(overflow.scrollHeight, 'session body overflows vertically').toBeLessThanOrEqual(overflow.clientHeight)
+    expect(overflow.scrollWidth, 'session body overflows horizontally').toBeLessThanOrEqual(overflow.clientWidth)
+  })
+
+  test('session panel does not clip once the navigation log is full', async ({ page }) => {
+    await page.goto('/')
+    const panel = page.getByRole('region', { name: 'session' })
+    const heightWithEmptyLog = (await panel.boundingBox())!.height
+
+    // Drive real client-side navigations (past the log's cap of 5) so the
+    // panel is measured in the state that is easiest to miss in review: a
+    // fully grown log, not the pristine first-load one.
+    for (const label of ['experience', 'projects', 'skills', 'info', 'experience', 'projects']) {
+      await page.getByRole('link', { name: label, exact: true }).click()
+      await page.waitForTimeout(50)
+    }
+
+    await expect(panel.locator('.log__row')).toHaveCount(5)
+
+    const heightWithFullLog = (await panel.boundingBox())!.height
+    expect(heightWithFullLog, 'session panel resized once the log filled up').toBe(heightWithEmptyLog)
+
+    const overflow = await panel.locator('.panel__body').evaluate(el => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    }))
+    expect(overflow.scrollHeight, 'session body overflows vertically once the log is full').toBeLessThanOrEqual(overflow.clientHeight)
+    expect(overflow.scrollWidth, 'session body overflows horizontally once the log is full').toBeLessThanOrEqual(overflow.clientWidth)
+  })
+
   test('whoami stack does not clip at the 768px (md) breakpoint', async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 })
     await page.goto('/')
