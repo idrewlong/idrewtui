@@ -27,6 +27,31 @@ test.describe('dashboard shell', () => {
     expect(after).toBe(before)
   })
 
+  test('visitor specs are fully visible, not clipped, once hydrated', async ({ page }) => {
+    await page.goto('/')
+    const panel = page.getByRole('region', { name: 'visitor' })
+
+    // Same fixed-height/CLS guard as the whoami test below: the panel must
+    // not resize once real values replace the pre-hydration em-dashes.
+    const before = (await panel.boundingBox())!.height
+    await expect(page.locator('html')).toHaveAttribute('data-ready', 'true')
+    const after = (await panel.boundingBox())!.height
+    expect(after).toBe(before)
+
+    // Rendered, not merely present: the fixed-height body must not clip its
+    // content now that real values have populated it (a clipped element can
+    // still pass a `toContainText` check). This is the same failure class
+    // that WhoamiPanel's rows had to be corrected for in Task 4.
+    const overflow = await panel.locator('.panel__body').evaluate(el => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    }))
+    expect(overflow.scrollHeight, 'visitor body overflows vertically').toBeLessThanOrEqual(overflow.clientHeight)
+    expect(overflow.scrollWidth, 'visitor body overflows horizontally').toBeLessThanOrEqual(overflow.clientWidth)
+  })
+
   test('whoami certifications and stack are fully visible, not clipped', async ({ page }) => {
     await page.goto('/')
     const panel = page.getByRole('region', { name: 'whoami' })

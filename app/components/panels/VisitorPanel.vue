@@ -36,6 +36,7 @@ const { specs } = useVisitorSpecs()
 .kv dd {
   color: var(--fg);
   margin: 0;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
