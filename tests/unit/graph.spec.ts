@@ -34,6 +34,10 @@ describe('barMeter', () => {
     expect(barMeter(-3, 4)).toBe('░░░░')
     expect(barMeter(9, 4)).toBe('████')
   })
+
+  it('treats non-finite fraction as zero (empty bar)', () => {
+    expect(barMeter(Number.NaN, 4)).toBe('░░░░')
+  })
 })
 
 describe('brailleChart', () => {
@@ -58,6 +62,35 @@ describe('brailleChart', () => {
   it('returns blank rows for an empty series', () => {
     const rows = brailleChart([], { width: 3, height: 2 })
     expect(rows).toEqual(['⠀⠀⠀', '⠀⠀⠀'])
+  })
+
+  it('pins exact braille output for an ascending series', () => {
+    // Ascending series [0, 30, 60, 90] in a 1-row chart produces specific dot pattern:
+    // Value 0 (t=0) → dotRow=3 (bottom), Value 90 (t=1) → dotRow=0 (top).
+    // Row 0 is the top; the code inverts vertically.
+    const rows = brailleChart([0, 30, 60, 90], { width: 2, height: 1, min: 0, max: 90 })
+    expect(rows).toHaveLength(1)
+    // First cell (dots from columns 0-1): bits 0x40|0x20 = 0x60
+    // Second cell (dots from columns 2-3): bits 0x02|0x08 = 0x0A
+    expect(rows[0]).toBe(String.fromCharCode(0x2860) + String.fromCharCode(0x280A))
+  })
+
+  it('handles a single value series', () => {
+    const rows = brailleChart([42], { width: 2, height: 1 })
+    expect(rows).toHaveLength(1)
+    expect([...rows[0]]).toHaveLength(2)
+  })
+
+  it('skips non-finite values during dot placement', () => {
+    const rows = brailleChart([10, Number.NaN, 30], { width: 2, height: 1 })
+    expect(rows).toHaveLength(1)
+    expect([...rows[0]]).toHaveLength(2)
+  })
+
+  it('renders a flat series (all equal values)', () => {
+    const rows = brailleChart([50, 50, 50], { width: 2, height: 1 })
+    expect(rows).toHaveLength(1)
+    expect([...rows[0]]).toHaveLength(2)
   })
 })
 

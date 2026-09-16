@@ -41,7 +41,13 @@ export function sparkline(values: number[], opts: { min?: number, max?: number }
   }).join('')
 }
 
-/** Proportional bar, e.g. `████░░░░`. */
+/**
+ * Proportional bar, e.g. `████░░░░`.
+ *
+ * Callers must not use this to represent unknown or unavailable data — an empty
+ * bar means a genuine zero. Panels represent "unavailable" with an em-dash and
+ * their own `supported` flag instead. This project forbids fabricating data.
+ */
 export function barMeter(fraction: number, width: number): string {
   const f = Number.isFinite(fraction) ? Math.min(1, Math.max(0, fraction)) : 0
   const filled = Math.round(f * width)
