@@ -218,3 +218,50 @@ button {
   .frame__label { padding: 0 0.75ch; }
   .frame__body { padding: 1rem 2.25ch 1.5rem; }
 }
+
+/* ── dashboard grid ─────────────────────────────────────────────────────── */
+
+/**
+ * Mobile first: one column, recruiter facts and content before the toys.
+ * Every panel keeps a fixed height, so hydration populates values without
+ * moving anything.
+ */
+.dash {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-areas:
+    "whoami"
+    "content"
+    "visitor"
+    "meters"
+    "wx"
+    "session";
+}
+
+.dash__whoami  { grid-area: whoami; }
+.dash__visitor { grid-area: visitor; }
+.dash__meters  { grid-area: meters; }
+.dash__content { grid-area: content; }
+.dash__wx      { grid-area: wx; }
+.dash__session { grid-area: session; }
+
+@media (min-width: 48rem) {
+  .dash {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "whoami  visitor"
+      "meters  session"
+      "content content"
+      "wx      wx";
+  }
+}
+
+@media (min-width: 75rem) {
+  .dash {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "whoami  visitor  meters"
+      "content content  content"
+      "wx      wx       session";
+  }
+}

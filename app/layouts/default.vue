@@ -114,23 +114,32 @@ useKeybindings({
   <div class="shell">
     <a class="skip" href="#main">Skip to content</a>
 
-    <!-- One frame: the tab bar and status line sit inset in its border. -->
-    <div class="shell__frame frame">
-      <TuiTabBar />
+    <div class="shell__frame dash">
+      <PanelsWhoamiPanel class="dash__whoami" />
+      <PanelsVisitorPanel class="dash__visitor" />
+      <PanelsMetersPanel class="dash__meters" />
 
-      <TuiPane>
-        <main id="main" tabindex="-1">
-          <slot />
-        </main>
-      </TuiPane>
+      <!-- One frame: the tab bar and status line sit inset in its border. -->
+      <div class="dash__content frame">
+        <TuiTabBar />
 
-      <TuiStatusLine
-        :path="currentPath"
-        :message="message"
-        :theme="theme"
-        @help="helpOpen = true"
-        @cycle-theme="onThemeCycle"
-      />
+        <TuiPane>
+          <main id="main" tabindex="-1">
+            <slot />
+          </main>
+        </TuiPane>
+
+        <TuiStatusLine
+          :path="currentPath"
+          :message="message"
+          :theme="theme"
+          @help="helpOpen = true"
+          @cycle-theme="onThemeCycle"
+        />
+      </div>
+
+      <PanelsWeatherPanel class="dash__wx" />
+      <PanelsSessionPanel class="dash__session" />
     </div>
 
     <TuiHelpOverlay v-model="helpOpen" />
@@ -147,7 +156,7 @@ useKeybindings({
 
 .shell__frame {
   width: 100%;
-  max-width: var(--pane-width);
+  max-width: 100rem;
 }
 
 main:focus { outline: none; }

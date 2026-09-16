@@ -50,8 +50,6 @@ async function copyEmail(value: string) {
   <div>
     <TuiPrompt :title="title" :command="tab.command" :path="tab.path" />
 
-    <ViewsFastfetch />
-
     <TuiRule id="about" title="about" />
     <p class="measure about">{{ profile.about }}</p>
 
