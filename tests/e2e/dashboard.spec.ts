@@ -201,6 +201,16 @@ test.describe('dashboard shell', () => {
     }))
     expect(overflow.scrollHeight, 'wx body overflows vertically').toBeLessThanOrEqual(overflow.clientHeight)
     expect(overflow.scrollWidth, 'wx body overflows horizontally').toBeLessThanOrEqual(overflow.clientWidth)
+
+    // The radar (stubbed via the auto stubRadar fixture in helpers.ts) only
+    // renders at the >=75rem breakpoint. This is exactly what the desktop
+    // project's 1366px viewport is, so the CLS/overflow guard above already
+    // ran with the radar present on that project — assert it explicitly so
+    // that coverage is intentional rather than incidental.
+    const viewport = page.viewportSize()
+    if (viewport && viewport.width >= 1200) {
+      await expect(panel.locator('.radar')).toBeVisible()
+    }
   })
 
   test('whoami stack does not clip at the 768px (md) breakpoint', async ({ page }) => {
