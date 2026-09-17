@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatScreen, parseUserAgent } from '../../app/composables/useVisitorSpecs'
+import { formatMemory, formatScreen, parseUserAgent, sanitizeGpuString } from '../../app/composables/useVisitorSpecs'
 
 describe('parseUserAgent', () => {
   const cases: Array<[string, string, string, string]> = [
@@ -29,5 +29,42 @@ describe('formatScreen', () => {
 
   it('rounds fractional ratios', () => {
     expect(formatScreen(1280, 800, 1.5)).toBe('1280x800 @1.5x')
+  })
+})
+
+describe('formatMemory', () => {
+  it('marks the API\'s clamp value as a floor, not an exact reading', () => {
+    expect(formatMemory(8)).toBe('8 GB+')
+  })
+
+  it('renders values below the clamp as-is', () => {
+    expect(formatMemory(4)).toBe('4 GB')
+    expect(formatMemory(0.5)).toBe('0.5 GB')
+  })
+
+  it('degrades to an em-dash when unsupported', () => {
+    expect(formatMemory(undefined)).toBe('—')
+    expect(formatMemory(null)).toBe('—')
+  })
+})
+
+describe('sanitizeGpuString', () => {
+  it('unwraps a real ANGLE string to the extracted model', () => {
+    expect(sanitizeGpuString('ANGLE (Apple, Apple M3, OpenGL 4.1)')).toBe('Apple M3')
+  })
+
+  it('passes through an unwrapped real renderer string', () => {
+    expect(sanitizeGpuString('Apple M3')).toBe('Apple M3')
+  })
+
+  it('treats a masked placeholder with no GPU signal as unsupported', () => {
+    expect(sanitizeGpuString('Brave')).toBeNull()
+    expect(sanitizeGpuString('Mozilla')).toBeNull()
+  })
+
+  it('degrades to null when there is nothing to sanitize', () => {
+    expect(sanitizeGpuString(null)).toBeNull()
+    expect(sanitizeGpuString(undefined)).toBeNull()
+    expect(sanitizeGpuString('')).toBeNull()
   })
 })

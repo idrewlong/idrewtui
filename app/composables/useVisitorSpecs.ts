@@ -43,7 +43,45 @@ export function formatScreen(w: number, h: number, dpr: number): string {
   return ratio === 1 ? `${w}x${h}` : `${w}x${h} @${ratio}x`
 }
 
-/** GPU string via WebGL. Returns null when the extension is unavailable or blocked. */
+/**
+ * Render helper for `deviceMemory`. The API is specified to round the
+ * machine's actual RAM DOWN to a power of two and then CLAMP it at 8 — a
+ * machine with 8, 16, or 128 GB all report `8`. So `8` never means "exactly
+ * 8 GB", it means "8 GB or more", and printing a bare "8 GB" would claim a
+ * precision the API deliberately refuses to give. Values below the clamp
+ * are the API's honest (if power-of-two-rounded) best guess and render as-is.
+ */
+export function formatMemory(gb: number | null | undefined): string {
+  if (gb === null || gb === undefined) return '—'
+  return gb >= 8 ? '8 GB+' : `${gb} GB`
+}
+
+/**
+ * Coarse plausibility filter for a WebGL renderer string — NOT an allowlist
+ * of supported hardware. Privacy-hardened browsers (Brave, and Firefox with
+ * `privacy.resistFingerprinting`) mask `WEBGL_debug_renderer_info` and hand
+ * back a placeholder such as the browser's own name ("Brave"), which our
+ * ANGLE-unwrap would otherwise print verbatim as if it were a GPU. A real
+ * renderer string — masked or not, wrapped in ANGLE's parens or bare —
+ * almost always contains one of these vendor/family/backend tokens; a
+ * placeholder string won't. Deliberately not browser-sniffing: this never
+ * checks for "Brave" or any other browser name, only for GPU-shaped text.
+ */
+const GPU_SIGNAL = /apple|nvidia|geforce|rtx|gtx|quadro|amd|radeon|intel|iris|uhd|hd graphics|adreno|mali|powervr|swiftshader|llvmpipe|vulkan|opengl|angle|metal|direct3d|m1|m2|m3|m4/i
+
+/**
+ * Pure: unwraps Chrome's ANGLE wrapper ("ANGLE (Apple, Apple M3, OpenGL 4.1)"
+ * -> "Apple M3") and applies the plausibility filter above. Exported so the
+ * unit tests can cover the masked-placeholder case without driving a real
+ * WebGL context.
+ */
+export function sanitizeGpuString(raw: string | null | undefined): string | null {
+  if (!raw) return null
+  const extracted = /ANGLE \(([^,]+), ([^,]+)/.exec(raw)?.[2]?.trim() ?? raw
+  return GPU_SIGNAL.test(extracted) ? extracted : null
+}
+
+/** GPU string via WebGL. Returns null when the extension is unavailable, blocked, or masked. */
 function readGpu(): string | null {
   try {
     const canvas = document.createElement('canvas')
@@ -54,8 +92,7 @@ function readGpu(): string | null {
     if (!ext) return null
 
     const raw = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) as string
-    // Chrome wraps the real name: "ANGLE (Apple, Apple M3, OpenGL 4.1)".
-    return /ANGLE \(([^,]+), ([^,]+)/.exec(raw)?.[2]?.trim() ?? raw
+    return sanitizeGpuString(raw)
   }
   catch {
     return null
@@ -84,12 +121,13 @@ export function useVisitorSpecs() {
   onMounted(() => {
     const nav = navigator as Navigator & { deviceMemory?: number }
     const { os, browser } = parseUserAgent(navigator.userAgent)
+    const memText = formatMemory(nav.deviceMemory)
 
     specs.value = [
       row('OS', os === UNKNOWN ? null : os),
       row('BROWSER', browser === UNKNOWN ? null : browser),
       row('CPU', nav.hardwareConcurrency ? `${nav.hardwareConcurrency} cores` : null),
-      row('MEM', nav.deviceMemory ? `${nav.deviceMemory} GB` : null),
+      { key: 'MEM', value: memText, supported: memText !== '—' },
       row('GPU', readGpu()),
       row('SCR', formatScreen(screen.width, screen.height, devicePixelRatio)),
       row('LANG', navigator.language),
