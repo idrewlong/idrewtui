@@ -40,6 +40,12 @@ describe('sunTimes', () => {
     expect(sunset).toBeNull()
   })
 
+  it('returns null inside the Arctic circle during polar day', () => {
+    const { sunrise, sunset } = sunTimes(new Date(Date.UTC(2026, 5, 21, 12)), 78.2, 15.6)
+    expect(sunrise).toBeNull()
+    expect(sunset).toBeNull()
+  })
+
   it('is stable regardless of the time of day passed in', () => {
     const a = sunTimes(new Date(Date.UTC(2026, 5, 21, 0)), LAT, LON)
     const b = sunTimes(new Date(Date.UTC(2026, 5, 21, 23)), LAT, LON)
