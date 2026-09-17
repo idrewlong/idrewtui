@@ -83,11 +83,18 @@ test.describe('dashboard shell', () => {
     // meters panel ticks continuously after hydration (fps, heap, etc.), so
     // this is the one place on the page where a height change would be
     // easiest to miss — it must still hold across every subsequent tick.
+    // 1200ms comfortably spans one frame-time measurement window too (the
+    // window closes every 1000ms), so the frame-time chart's blank->filled
+    // transition is covered by the same guard.
     const before = (await panel.boundingBox())!.height
     await expect(page.locator('html')).toHaveAttribute('data-ready', 'true')
     await page.waitForTimeout(1200)
     const after = (await panel.boundingBox())!.height
     expect(after).toBe(before)
+
+    // The frame-time chart carries a text summary, same as the weather
+    // panel's temperature chart — the glyphs are aria-hidden.
+    await expect(panel.getByText(/frame time: .*ms/)).toBeAttached()
 
     // Rendered, not merely present: the fixed-height body must not clip its
     // content now that live values have populated it.

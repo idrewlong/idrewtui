@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatFps, pushSample } from '../../app/composables/useFrameRate'
+import { formatFps, formatFrameTime, pushSample } from '../../app/composables/useFrameRate'
 import { bytesToMb } from '../../app/composables/useMemoryMeter'
 import { formatRtt } from '../../app/composables/useNetworkInfo'
 
@@ -43,6 +43,20 @@ describe('formatFps', () => {
 
   it('shows an ordinary measured rate', () => {
     expect(formatFps(60)).toBe('60')
+  })
+})
+
+describe('formatFrameTime', () => {
+  it('shows an em dash before any sample has landed', () => {
+    expect(formatFrameTime(null)).toBe('—')
+  })
+
+  it('renders a genuine reading with a unit suffix', () => {
+    expect(formatFrameTime(16.7)).toBe('16.7ms')
+  })
+
+  it('shows a genuine zero reading rather than masking it', () => {
+    expect(formatFrameTime(0)).toBe('0ms')
   })
 })
 

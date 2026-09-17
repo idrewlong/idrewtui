@@ -26,7 +26,7 @@ const bounds = computed(() => {
 </script>
 
 <template>
-  <div class="chart">
+  <div class="chart" aria-live="off">
     <div class="chart__plot" aria-hidden="true">
       <div v-if="bounds" class="chart__axis">
         <span>{{ bounds.hi }}</span>
