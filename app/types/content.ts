@@ -32,6 +32,8 @@ export interface Profile {
   role: string
   employer: string
   location: string
+  /** Fallback coordinates for the weather panel, paired with `location`. */
+  coords: { lat: number, lon: number }
   /** fastfetch key/value rows, in render order. */
   stack: string[]
   infra: string[]

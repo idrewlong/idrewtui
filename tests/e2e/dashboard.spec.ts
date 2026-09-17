@@ -151,6 +151,51 @@ test.describe('dashboard shell', () => {
     expect(overflow.scrollWidth, 'session body overflows horizontally once the log is full').toBeLessThanOrEqual(overflow.clientWidth)
   })
 
+  test('weather panel is fully visible, not clipped, and does not resize on hydration', async ({ page, context }) => {
+    // Stub the site's one network call rather than hitting the live API, and
+    // grant geolocation so the panel renders its tallest realistic state: a
+    // full hourly braille chart plus a known precipitation chance.
+    await context.grantPermissions(['geolocation'])
+    await context.setGeolocation({ latitude: 34.73, longitude: -86.58 })
+    await page.route('**/api.open-meteo.com/**', route =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          current: { temperature_2m: 74.1, weather_code: 2 },
+          hourly: {
+            time: Array.from({ length: 24 }, (_, i) => `2026-09-15T${String(i).padStart(2, '0')}:00`),
+            temperature_2m: Array.from({ length: 24 }, (_, i) => 65 + Math.round(10 * Math.sin(i / 3))),
+            precipitation_probability: Array.from({ length: 24 }, (_, i) => Math.round(50 + 40 * Math.sin(i / 5))),
+          },
+        }),
+      }))
+
+    await page.goto('/')
+    const panel = page.getByRole('region', { name: /^wx/ })
+
+    // Same fixed-height/CLS guard as the other panels: the height measured
+    // before hydration (the pre-hydration skeleton) must match the height
+    // once the forecast, sun and moon have populated the body.
+    const before = (await panel.boundingBox())!.height
+    await expect(page.locator('html')).toHaveAttribute('data-ready', 'true')
+    await expect(panel).toContainText('your location')
+    const after = (await panel.boundingBox())!.height
+    expect(after).toBe(before)
+
+    // Rendered, not merely present: the fixed-height body must not clip its
+    // content now that the chart, precipitation bar, and astro line have
+    // all populated it.
+    const overflow = await panel.locator('.panel__body').evaluate(el => ({
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    }))
+    expect(overflow.scrollHeight, 'wx body overflows vertically').toBeLessThanOrEqual(overflow.clientHeight)
+    expect(overflow.scrollWidth, 'wx body overflows horizontally').toBeLessThanOrEqual(overflow.clientWidth)
+  })
+
   test('whoami stack does not clip at the 768px (md) breakpoint', async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 })
     await page.goto('/')

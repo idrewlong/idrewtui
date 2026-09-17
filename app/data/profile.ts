@@ -10,6 +10,8 @@ export const profile: Profile = {
   role: 'Senior Full Stack Developer',
   employer: 'Mad Genius',
   location: 'Long Beach, MS',
+  /** Fallback for the weather panel when geolocation is unavailable. */
+  coords: { lat: 30.35, lon: -89.15 },
 
   stack: ['TypeScript', 'Vue/Nuxt', 'React', 'Laravel', 'Go'],
   infra: ['AWS', 'DigitalOcean', 'WP Engine', 'Docker'],
