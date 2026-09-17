@@ -1,6 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
-import { gotoHydrated } from './helpers'
+import { expect, gotoHydrated, test } from './helpers'
 
 const routes = ['/', '/experience', '/projects', '/skills', '/not-a-real-path']
 

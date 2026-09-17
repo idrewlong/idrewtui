@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './helpers'
 
 test.describe('dashboard shell', () => {
   test('renders the named panels around the content region', async ({ page }) => {

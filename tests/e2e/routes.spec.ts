@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './helpers'
 
 const routes = [
   { path: '/', heading: /Andrew Long/, tab: 'info' },

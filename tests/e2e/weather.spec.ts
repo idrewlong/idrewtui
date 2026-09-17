@@ -1,6 +1,11 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './helpers'
 
-/** Never hit the live API from CI. */
+/**
+ * Overrides the shared `stubWeather` auto-fixture (helpers.ts) with a
+ * payload this file's own tests care about. Later-registered handlers win,
+ * so this still fully replaces the default stub — belt-and-suspenders with
+ * the project-wide fixture, not a substitute for it.
+ */
 const PAYLOAD = {
   current: { temperature_2m: 74.1, weather_code: 2 },
   hourly: {

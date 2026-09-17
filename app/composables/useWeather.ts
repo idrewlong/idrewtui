@@ -1,4 +1,4 @@
-import { ref, watch, type Ref } from 'vue'
+import { onMounted, ref, watch, type Ref } from 'vue'
 import type { Coords } from '~/composables/useGeolocation'
 
 export interface Forecast {
@@ -66,23 +66,50 @@ export function toForecast(payload: unknown): Forecast | null {
   }
 }
 
-function cacheKey(c: Coords) {
+export function cacheKey(c: Coords) {
   return `${CACHE_PREFIX}${c.lat},${c.lon}`
 }
 
-function readCache(c: Coords): Forecast | null {
+/**
+ * Structural check on a *cached* `Forecast`, not a raw Open-Meteo payload —
+ * `toForecast` can't be reused directly here because the shapes differ
+ * (`hourly` is already a flat `number[]`, not `{ time, temperature_2m }`).
+ *
+ * This exists because `readCache` used to trust `JSON.parse`'s output
+ * unconditionally: a cache entry written by an older deploy (before
+ * `precipChance` existed) parses as valid JSON missing that field, and
+ * without this check the panel rendered `chance of rain NaN%` — `undefined
+ * !== null`, so the template's null guard never caught it. A shape mismatch
+ * here must be treated exactly like a cache miss.
+ */
+export function isForecast(v: unknown): v is Forecast {
+  if (!v || typeof v !== 'object') return false
+  const f = v as Partial<Record<keyof Forecast, unknown>>
+  return isNumber(f.tempNow)
+    && isNumber(f.code)
+    && Array.isArray(f.hourly) && f.hourly.every(isNumber)
+    && isNumber(f.hourStart)
+    && (f.precipChance === null || isNumber(f.precipChance))
+}
+
+export function readCache(c: Coords): Forecast | null {
   try {
     const raw = localStorage.getItem(cacheKey(c))
     if (!raw) return null
-    const { at, forecast } = JSON.parse(raw) as { at: number, forecast: Forecast }
-    return Date.now() - at < TTL_MS ? forecast : null
+
+    const parsed = JSON.parse(raw) as { at?: unknown, forecast?: unknown }
+    if (!isNumber(parsed.at) || Date.now() - parsed.at >= TTL_MS) return null
+
+    // Revalidate rather than trust: a stale-shaped entry is a miss, not a
+    // NaN-producing hit.
+    return isForecast(parsed.forecast) ? parsed.forecast : null
   }
   catch {
     return null
   }
 }
 
-function writeCache(c: Coords, forecast: Forecast) {
+export function writeCache(c: Coords, forecast: Forecast) {
   try {
     localStorage.setItem(cacheKey(c), JSON.stringify({ at: Date.now(), forecast }))
   }
@@ -95,6 +122,19 @@ function writeCache(c: Coords, forecast: Forecast) {
  * Current conditions and an hourly curve from Open-Meteo — free, no API key,
  * CORS-enabled. The only network request the site makes, and only coarsened
  * coordinates leave the browser.
+ *
+ * The fetch is deliberately started from `onMounted`, not from a bare
+ * `watch(..., { immediate: true })` in setup — every other composable with a
+ * side effect in this project (`useFrameRate`, `useBattery`,
+ * `useVisitorSpecs`, `useGeolocation` itself, ...) gates it the same way,
+ * because `setup()` also runs during SSR/prerendering. A watcher fired at
+ * setup time is a fire-and-forget promise nothing awaits, but the
+ * `fetch()` call inside it still gets dispatched for real: `nuxt generate`
+ * (which every `pnpm test:e2e` run invokes to build the site it tests)
+ * kept 5 real requests reaching api.open-meteo.com — one per prerendered
+ * route — entirely outside any browser, so no Playwright route stub could
+ * ever have caught it. `onMounted` never fires during SSR, so this runs
+ * client-side only, exactly once real hydration happens.
  */
 export function useWeather(coords: Ref<Coords>) {
   const forecast = ref<Forecast | null>(null)
@@ -130,7 +170,9 @@ export function useWeather(coords: Ref<Coords>) {
     }
   }
 
-  watch(coords, load, { immediate: true })
+  onMounted(() => {
+    watch(coords, load, { immediate: true })
+  })
 
   return { forecast, status }
 }

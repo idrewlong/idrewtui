@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test'
-import { gotoHydrated } from './helpers'
+import { expect, gotoHydrated, test } from './helpers'
 
 test.describe('keyboard navigation', () => {
   test('1-4 switch tabs', async ({ page }) => {
