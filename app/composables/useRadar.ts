@@ -1,4 +1,4 @@
-import { onMounted, ref, watch, type Ref } from 'vue'
+import { isRef, onMounted, ref, toValue, watch, type MaybeRefOrGetter, type Ref } from 'vue'
 import type { Coords } from '~/composables/useGeolocation'
 import {
   alphaGridFromPixels,
@@ -83,12 +83,32 @@ function loadImage(url: string): Promise<HTMLImageElement> {
  * { immediate: true })` in setup — see `useWeather` for why a network call
  * in `setup()` gets dispatched for real during `nuxt generate`, entirely
  * outside any browser Playwright could stub.
+ *
+ * `cellCols` may be a plain number or a `Ref`/getter — the panel measures
+ * its actual available width and updates it live as the window resizes, so
+ * the grid always fills the space it's given rather than rendering at one
+ * hardcoded size regardless of viewport. Changing it re-renders from the
+ * tile's pixel data, which is cached after the first successful load — a
+ * resize never re-fetches the network or re-decodes the image, only
+ * re-runs the pure `alphaGridFromPixels`/`densityToBraille` transform.
  */
-export function useRadar(coords: Ref<Coords>, cellCols = 20, cellRows = 3) {
+export function useRadar(coords: Ref<Coords>, cellCols: MaybeRefOrGetter<number> = 20, cellRows = 3) {
   const status = ref<RadarStatus>('idle')
   const rows = ref<string[]>([])
   const coveragePercent = ref<number | null>(null)
   const frameAt = ref<Date | null>(null)
+
+  // The raw pixel buffer from the last successful tile load. Kept only so a
+  // column-count change can re-render without re-fetching; never exposed.
+  let cachedPixels: Uint8ClampedArray | null = null
+
+  function renderFromCache() {
+    if (!cachedPixels) return
+    const cols = Math.max(1, Math.floor(toValue(cellCols)))
+    const grid = alphaGridFromPixels(cachedPixels, TILE_PX, TILE_PX, cols, cellRows)
+    rows.value = densityToBraille(grid)
+    coveragePercent.value = Math.round(averageDensity(grid) * 1000) / 10
+  }
 
   async function load(c: Coords) {
     status.value = 'loading'
@@ -117,13 +137,13 @@ export function useRadar(coords: Ref<Coords>, cellCols = 20, cellRows = 3) {
       // header above, but still a non-event if it ever does.
       const { data } = ctx.getImageData(0, 0, TILE_PX, TILE_PX)
 
-      const grid = alphaGridFromPixels(data, TILE_PX, TILE_PX, cellCols, cellRows)
-      rows.value = densityToBraille(grid)
-      coveragePercent.value = Math.round(averageDensity(grid) * 1000) / 10
+      cachedPixels = data
       frameAt.value = new Date(frame.time * 1000)
+      renderFromCache()
       status.value = 'ready'
     }
     catch {
+      cachedPixels = null
       rows.value = []
       coveragePercent.value = null
       frameAt.value = null
@@ -133,6 +153,9 @@ export function useRadar(coords: Ref<Coords>, cellCols = 20, cellRows = 3) {
 
   onMounted(() => {
     watch(coords, load, { immediate: true })
+    if (isRef(cellCols) || typeof cellCols === 'function') {
+      watch(() => toValue(cellCols), renderFromCache)
+    }
   })
 
   return { status, rows, coveragePercent, frameAt }
