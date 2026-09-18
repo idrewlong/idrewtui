@@ -123,12 +123,22 @@ defineExpose({
             <span class="group__label">{{ group.label }}</span>
           </h2>
 
-          <ul class="rows" role="listbox" :aria-label="group.label">
-            <li v-for="project in group.items" :key="project.slug" role="option" :aria-selected="isSelected(project)">
+          <!--
+            Plain list of buttons, not an ARIA listbox: a `role="option"` item
+            may not contain a separately focusable descendant (axe
+            `nested-interactive`), and each row here already IS the one
+            focusable, clickable thing — selecting it updates the preview
+            pane, same as a native button toggling other content. Selection
+            state is exposed with `aria-current`, which is meant for exactly
+            this ("the one that's current," not "the one submitted").
+          -->
+          <ul class="rows" :aria-label="group.label">
+            <li v-for="project in group.items" :key="project.slug">
               <button
                 type="button"
                 class="row"
                 :data-selected="isSelected(project)"
+                :aria-current="isSelected(project) ? 'true' : undefined"
                 @click="selectSlug(project.slug)"
               >
                 <span class="row__name">{{ project.name }}</span>
