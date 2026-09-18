@@ -47,8 +47,9 @@ import { track } from '~/utils/analytics'
   align-items: center;
   gap: 0.75ch;
   min-width: 0;
-  flex: 1;
-  overflow: hidden;
+  /* Size to content; the decorative `.frame__gap` (flex: 1) absorbs
+     whatever room is left, shrinking to its own floor first. */
+  flex: 0 1 auto;
 }
 
 .tab {
@@ -61,11 +62,6 @@ import { track } from '~/utils/analytics'
   min-width: 0;
 }
 .tab:hover { color: var(--fg); }
-
-.tab__label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 .tab__key {
   display: none;
