@@ -13,6 +13,7 @@
     "dev": "nuxt dev",
     "generate": "node scripts/fetch-github.mjs && node scripts/generate-themes.mjs && nuxt generate && node scripts/finalize-static.mjs",
     "generate-themes": "node scripts/generate-themes.mjs",
+    "generate-og": "node scripts/generate-og.mjs",
     "fetch-github": "node scripts/fetch-github.mjs",
     "lighthouse": "lhci autorun",
     "lint": "eslint .",
