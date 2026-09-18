@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { experience } from '../../app/data/experience'
 import { profile } from '../../app/data/profile'
@@ -135,5 +137,13 @@ describe('navigation', () => {
       expect(tab.path.length).toBeGreaterThan(0)
       expect(tab.command.length).toBeGreaterThan(0)
     }
+  })
+})
+
+describe('public/resume.pdf', () => {
+  it('is a real PDF at the canonical path every view links to', () => {
+    const path = join(process.cwd(), 'public/resume.pdf')
+    expect(existsSync(path), 'public/resume.pdf is missing').toBe(true)
+    expect(readFileSync(path).subarray(0, 5).toString('ascii')).toBe('%PDF-')
   })
 })

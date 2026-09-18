@@ -36,3 +36,48 @@ const CODES: Record<number, string> = {
 export function describeWeatherCode(code: number): string {
   return CODES[code] ?? 'unknown'
 }
+
+/**
+ * Tiny decorative glyph for the forecast card. Hidden from assistive tech;
+ * `describeWeatherCode` is the accessible text.
+ */
+export function asciiWeather(code: number): string {
+  if (code === 0 || code === 1) {
+    return [
+      '  \\   /  ',
+      '   .-.   ',
+      '― (   ) ―',
+      '   `-`   ',
+    ].join('\n')
+  }
+  if (code >= 95) {
+    return [
+      '   .--.  ',
+      '  (    ) ',
+      '  /_  _\\ ',
+      '   /\\    ',
+    ].join('\n')
+  }
+  if (code >= 71 && code <= 86) {
+    return [
+      '   .--.  ',
+      '  (    ) ',
+      '  * * *  ',
+      ' *  *  * ',
+    ].join('\n')
+  }
+  if (code >= 51) {
+    return [
+      '   .--.  ',
+      '  (    ) ',
+      "  ' ' '  ",
+      " ' ' ' ' ",
+    ].join('\n')
+  }
+  return [
+    '   .--.  ',
+    '  (    ) ',
+    ' (__-__) ',
+    '         ',
+  ].join('\n')
+}

@@ -36,8 +36,10 @@ describe('shortcut table', () => {
     for (const expected of [
       'tab:1', 'tab:2', 'tab:3', 'tab:4', 'tab:prev', 'tab:next',
       'list:down', 'list:up', 'list:open', 'scroll:top', 'scroll:bottom',
-      'projects:filter', 'resume:open', 'email:copy', 'theme:toggle',
+      'projects:filter',       'resume:open', 'email:copy', 'theme:toggle',
       'help:toggle', 'overlay:close',
+      'palette:open', 'find:open', 'find:next', 'find:prev', 'card:copy',
+      'compose:open',
     ]) {
       expect(actions.has(expected as ShortcutAction), `missing ${expected}`).toBe(true)
     }
@@ -78,6 +80,12 @@ describe('resolveAction', () => {
     expect(resolveAction(keyEvent('l'))).toBe('tab:next')
     expect(resolveAction(keyEvent('?'))).toBe('help:toggle')
     expect(resolveAction(keyEvent('Escape'))).toBe('overlay:close')
+    expect(resolveAction(keyEvent(':'))).toBe('palette:open')
+    expect(resolveAction(keyEvent('/'))).toBe('find:open')
+    expect(resolveAction(keyEvent('n'))).toBe('find:next')
+    expect(resolveAction(keyEvent('N'))).toBe('find:prev')
+    expect(resolveAction(keyEvent('Y'))).toBe('card:copy')
+    expect(resolveAction(keyEvent('m'))).toBe('compose:open')
   })
 
   it('is case-sensitive, so g and G differ', () => {

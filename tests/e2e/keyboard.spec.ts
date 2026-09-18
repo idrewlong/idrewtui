@@ -62,6 +62,18 @@ test.describe('keyboard navigation', () => {
     await expect(page.getByRole('button', { name: '[client]' })).toHaveAttribute('aria-pressed', 'true')
   })
 
+  test('j moves the ranger selection and the preview follows', async ({ page }) => {
+    await gotoHydrated(page, '/projects')
+    await expect(page.getByRole('region', { name: 'Preview madg.com' })).toBeVisible()
+    await page.keyboard.press('j')
+    await expect(page.getByRole('region', { name: 'Preview wgyates.com' })).toBeVisible()
+  })
+
+  test('experience --stat lists stack tokens from the bullets', async ({ page }) => {
+    await gotoHydrated(page, '/experience')
+    await expect(page.getByText('Nuxt · React · React Native · Laravel')).toBeVisible()
+  })
+
   test('shortcuts are ignored while typing in a field', async ({ page }) => {
     await gotoHydrated(page, '/')
 

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { experience } from '~/data/experience'
 import { formatRange, machineRange } from '~/utils/format'
+import { useYankContext } from '~/composables/useYankContext'
+import { roleStat } from '~/utils/role-stat'
 
 /**
  * Work history as a `git log --graph`.
@@ -10,33 +12,49 @@ import { formatRange, machineRange } from '~/utils/format'
  * fake commit hashes are decorative and aria-hidden.
  */
 
+const yank = useYankContext()
+const entries = experience.map(role => ({ role, stat: roleStat(role) }))
+
 /** Stable decorative "hash" per role — derived, so it never changes between builds. */
 function fakeHash(slug: string): string {
   let h = 0
   for (const ch of slug) h = (h * 31 + ch.charCodeAt(0)) >>> 0
   return h.toString(16).padStart(7, '0').slice(0, 7)
 }
+
+function onToggle(slug: string, event: Event) {
+  const details = event.target as HTMLDetailsElement
+  if (details.open) yank.setRole(slug)
+}
 </script>
 
 <template>
   <ol class="log">
-    <li v-for="role in experience" :key="role.slug" class="log__item">
+    <li v-for="entry in entries" :key="entry.role.slug" class="log__item">
       <span class="log__graph glyph" aria-hidden="true">*</span>
 
-      <details class="role" :open="role.featured">
+      <details
+        :id="entry.role.slug"
+        class="role"
+        :open="entry.role.featured"
+        @toggle="onToggle(entry.role.slug, $event)"
+      >
         <summary class="role__summary">
-          <span class="role__hash glyph" aria-hidden="true">{{ fakeHash(role.slug) }}</span>
-          <time class="role__dates" :datetime="machineRange(role.start, role.end)">
-            {{ formatRange(role.start, role.end) }}
+          <span class="role__hash glyph" aria-hidden="true">{{ fakeHash(entry.role.slug) }}</span>
+          <time class="role__dates" :datetime="machineRange(entry.role.start, entry.role.end)">
+            {{ formatRange(entry.role.start, entry.role.end) }}
           </time>
           <span class="role__title">
-            <h2 class="role__heading">{{ role.title }}</h2>
-            <span class="role__employer">· {{ role.employer }}</span>
+            <h2 class="role__heading">{{ entry.role.title }}</h2>
+            <span class="role__employer">· {{ entry.role.employer }}</span>
           </span>
+          <p v-if="entry.stat.stack.length" class="role__stat">
+            <span aria-hidden="true">--stat  </span>{{ entry.stat.stack.join(' · ') }}
+          </p>
         </summary>
 
-        <ul v-if="role.bullets.length" class="role__bullets">
-          <li v-for="bullet in role.bullets" :key="bullet">{{ bullet }}</li>
+        <ul v-if="entry.role.bullets.length" class="role__bullets">
+          <li v-for="bullet in entry.role.bullets" :key="bullet">{{ bullet }}</li>
         </ul>
       </details>
     </li>
@@ -107,6 +125,13 @@ function fakeHash(slug: string): string {
 }
 
 .role__employer { color: var(--link); }
+
+.role__stat {
+  flex: 1 1 100%;
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: var(--text-status);
+}
 
 .role__bullets {
   margin-top: 0.5rem;

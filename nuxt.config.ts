@@ -25,7 +25,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
-      routes: ['/', '/experience', '/projects', '/skills', '/sitemap.xml', '/404'],
+      routes: ['/', '/experience', '/projects', '/skills', '/sitemap.xml', '/404', '/resume.txt', '/index.txt'],
       failOnError: true,
     },
   },
@@ -48,6 +48,9 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      ],
       link: [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
     },
   },

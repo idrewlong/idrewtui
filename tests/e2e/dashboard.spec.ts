@@ -3,7 +3,7 @@ import { expect, test } from './helpers'
 test.describe('dashboard shell', () => {
   test('renders the named panels around the content region', async ({ page }) => {
     await page.goto('/')
-    for (const title of ['whoami', 'visitor', 'meters', 'wx', 'session']) {
+    for (const title of ['whoami', 'visitor', 'meters', 'wx', 'session', 'github']) {
       await expect(page.getByRole('region', { name: title })).toBeVisible()
     }
     await expect(page.locator('#main')).toBeVisible()
@@ -161,7 +161,7 @@ test.describe('dashboard shell', () => {
   test('weather panel is fully visible, not clipped, and does not resize on hydration', async ({ page, context }) => {
     // Stub the site's one network call rather than hitting the live API, and
     // grant geolocation so the panel renders its tallest realistic state: a
-    // full hourly braille chart plus a known precipitation chance.
+    // compact forecast card plus a known precipitation chance.
     await context.grantPermissions(['geolocation'])
     await context.setGeolocation({ latitude: 34.73, longitude: -86.58 })
     await page.route('**/api.open-meteo.com/**', route =>
@@ -191,8 +191,7 @@ test.describe('dashboard shell', () => {
     expect(after).toBe(before)
 
     // Rendered, not merely present: the fixed-height body must not clip its
-    // content now that the chart, precipitation bar, and astro line have
-    // all populated it.
+    // content now that the forecast facts and astro line have populated it.
     const overflow = await panel.locator('.panel__body').evaluate(el => ({
       scrollHeight: el.scrollHeight,
       clientHeight: el.clientHeight,
@@ -201,16 +200,6 @@ test.describe('dashboard shell', () => {
     }))
     expect(overflow.scrollHeight, 'wx body overflows vertically').toBeLessThanOrEqual(overflow.clientHeight)
     expect(overflow.scrollWidth, 'wx body overflows horizontally').toBeLessThanOrEqual(overflow.clientWidth)
-
-    // The radar (stubbed via the auto stubRadar fixture in helpers.ts) only
-    // renders at the >=75rem breakpoint. This is exactly what the desktop
-    // project's 1366px viewport is, so the CLS/overflow guard above already
-    // ran with the radar present on that project — assert it explicitly so
-    // that coverage is intentional rather than incidental.
-    const viewport = page.viewportSize()
-    if (viewport && viewport.width >= 1200) {
-      await expect(panel.locator('.radar')).toBeVisible()
-    }
   })
 
   test('whoami stack does not clip at the 768px (md) breakpoint', async ({ page }) => {

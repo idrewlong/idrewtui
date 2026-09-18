@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { moonPhase, sunTimes } from '../../app/utils/sun'
-import { describeWeatherCode } from '../../app/utils/weather-codes'
+import { asciiWeather, describeWeatherCode } from '../../app/utils/weather-codes'
 
 /** Long Beach, Mississippi. */
 const LAT = 30.35
@@ -85,5 +85,21 @@ describe('describeWeatherCode', () => {
 
   it('falls back rather than throwing on an unknown code', () => {
     expect(describeWeatherCode(999)).toBe('unknown')
+  })
+})
+
+describe('asciiWeather', () => {
+  it('is four lines for every family of code', () => {
+    for (const code of [0, 2, 63, 73, 95]) {
+      expect(asciiWeather(code).split('\n')).toHaveLength(4)
+    }
+  })
+
+  it('uses a distinct glyph for clear, rain, snow, and storms', () => {
+    const clear = asciiWeather(0)
+    const rain = asciiWeather(63)
+    const snow = asciiWeather(73)
+    const storm = asciiWeather(95)
+    expect(new Set([clear, rain, snow, storm]).size).toBe(4)
   })
 })

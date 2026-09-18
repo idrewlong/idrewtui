@@ -21,11 +21,20 @@ useSeoMeta({
 
 useHead({ link: [{ rel: 'canonical', href: 'https://idrewlong.com/projects' }] })
 
-const list = ref<{ cycleFilter: () => void } | null>(null)
+const list = ref<{
+  cycleFilter: () => void
+  down: () => void
+  up: () => void
+  openSelected: () => void
+} | null>(null)
 
 // `f` cycles the filter; the filter buttons do the same thing with a click.
+// j/k/Enter drive the ranger list.
 usePageShortcuts({
   'projects:filter': () => list.value?.cycleFilter(),
+  'list:down': () => list.value?.down(),
+  'list:up': () => list.value?.up(),
+  'list:open': () => list.value?.openSelected(),
 })
 </script>
 

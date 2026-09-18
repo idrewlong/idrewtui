@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 3000
+const PORT = Number(process.env.E2E_PORT ?? 3000)
 const baseURL = `http://localhost:${PORT}`
 
 export default defineConfig({
@@ -18,8 +18,8 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['Pixel 5'] } },
   ],
   // Test the real static output, which is what ships.
-  webServer: {
-    command: 'pnpm generate && pnpm preview',
+  webServer: process.env.E2E_SKIP_WEBSERVER ? undefined : {
+    command: `pnpm generate && nuxt preview --port ${PORT}`,
     url: baseURL,
     // Never reuse: the command rebuilds, so an already-running preview server
     // would silently serve a stale build and the run would pass or fail against

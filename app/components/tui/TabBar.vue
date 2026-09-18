@@ -45,12 +45,12 @@ import { track } from '~/utils/analytics'
 .tabbar__list {
   display: flex;
   align-items: center;
-  gap: 1ch;
-  /* Guard: never let a long label push the resume link out of the frame. */
+  gap: 0.75ch;
+  min-width: 0;
+  flex: 1;
   overflow: hidden;
 }
 
-/* Vertical padding enlarges the touch target without changing the bar height. */
 .tab {
   display: inline-flex;
   align-items: center;
@@ -58,12 +58,20 @@ import { track } from '~/utils/analytics'
   min-height: 1.5rem;
   color: var(--muted);
   text-decoration: none;
+  min-width: 0;
 }
 .tab:hover { color: var(--fg); }
 
-.tab__key { color: var(--muted); }
+.tab__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-/* Active tab: amber, and the marker is never colour alone. */
+.tab__key {
+  display: none;
+  color: var(--muted);
+}
+
 .tab[aria-current="page"] {
   color: var(--accent);
   font-weight: 600;
@@ -71,16 +79,9 @@ import { track } from '~/utils/analytics'
 .tab[aria-current="page"] .tab__key { color: var(--accent); }
 .tab[aria-current="page"] .tab__label { text-decoration: underline; }
 
-.tab--resume { color: var(--link); }
+.tab--resume { color: var(--link); flex-shrink: 0; }
 
-/*
- * The [n] prefixes are keyboard affordances. On touch widths they are noise and
- * they cost ~16 characters, which is the difference between the bar fitting on
- * a 360px screen and wrapping out of the border.
- */
-.tab__key { display: none; }
-
-@media (min-width: 40rem) {
+@media (min-width: 48rem) {
   .tab__key { display: inline; }
   .tabbar__list { gap: 1.5ch; }
 }

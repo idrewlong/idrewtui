@@ -49,8 +49,26 @@ test.describe('weather panel', () => {
     await expect(panel).toContainText(/waxing|waning|full|new|quarter/)
   })
 
-  test('the temperature chart carries a text summary', async ({ page }) => {
+  test('shows compact forecast facts next to decorative ascii', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByText(/Hourly temperature: .*°F/)).toBeAttached()
+    const panel = page.getByRole('region', { name: /^wx/ })
+    await expect(panel).toContainText('Forecast for')
+    await expect(panel.getByText('weather', { exact: true })).toBeVisible()
+    await expect(panel.getByText('sunset', { exact: true })).toBeVisible()
+    await expect(panel.getByText('precip', { exact: true })).toBeVisible()
+    await expect(panel.getByText('moon', { exact: true })).toBeVisible()
+    await expect(panel.locator('.wx__art')).toBeVisible()
+    await expect(panel.locator('.wx__art')).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  test('does not overflow the viewport at 360px', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 })
+    await page.goto('/')
+    await expect(page.locator('html')).toHaveAttribute('data-ready', 'true')
+    const overflow = await page.evaluate(() => ({
+      scroll: document.documentElement.scrollWidth,
+      inner: window.innerWidth,
+    }))
+    expect(overflow.scroll, 'page is wider than the viewport').toBeLessThanOrEqual(overflow.inner + 1)
   })
 })

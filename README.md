@@ -110,8 +110,6 @@ These are tracked rather than silently shipped:
   Note this does not currently cost anything measurable: Lighthouse Performance
   is 100 and LCP is ~445 ms, because all content is in the prerendered HTML and
   the JS only hydrates behaviour.
-- **`public/resume.pdf` is missing.** Every view links to it. Drop the real PDF
-  in and the links work; it is deliberately not stubbed with a placeholder file.
 - **Commit Mono is not bundled.** See `public/fonts/README.md`. The fallback
   monospace stack is used until the woff2 files are added.
 - **`/og.png` is not generated.** Referenced by the Open Graph tags; should be a

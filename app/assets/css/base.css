@@ -13,6 +13,8 @@
 html {
   /* Reserve the scrollbar so switching tabs never shifts layout. */
   scrollbar-gutter: stable;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body {
@@ -24,6 +26,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 h1, h2, h3 {
@@ -144,6 +148,20 @@ button {
   display: none !important;
 }
 
+:root[data-js] .no-js-only {
+  display: none !important;
+}
+
+::highlight(find-match) {
+  background-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--fg);
+}
+
+::highlight(find-current) {
+  background-color: var(--accent);
+  color: var(--bg);
+}
+
 /* ── frame ──────────────────────────────────────────────────────────────── */
 
 /**
@@ -187,6 +205,9 @@ button {
   height: var(--frame-row);
   padding: 0 1ch;
   font-size: 0.6875rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /**
@@ -235,8 +256,12 @@ button {
     "visitor"
     "meters"
     "wx"
-    "session";
+    "session"
+    "github";
+  min-width: 0;
 }
+
+.dash > * { min-width: 0; }
 
 .dash__whoami  { grid-area: whoami; }
 .dash__visitor { grid-area: visitor; }
@@ -244,6 +269,7 @@ button {
 .dash__content { grid-area: content; }
 .dash__wx      { grid-area: wx; }
 .dash__session { grid-area: session; }
+.dash__github  { grid-area: github; }
 
 @media (min-width: 48rem) {
   .dash {
@@ -252,7 +278,8 @@ button {
       "whoami  visitor"
       "meters  meters"
       "content content"
-      "wx      session";
+      "wx      session"
+      "github  github";
   }
 }
 
@@ -262,6 +289,6 @@ button {
     grid-template-areas:
       "whoami  visitor  meters"
       "content content  content"
-      "wx      wx       session";
+      "wx      session  github";
   }
 }

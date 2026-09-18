@@ -4,30 +4,28 @@ import type { Theme } from '~/composables/useTheme'
 
 /**
  * tmux/vim-style status bar, inset in the frame's bottom border, and the home
- * for the click equivalents of the global shortcuts (`t` theme, `?` help) —
- * every shortcut needs a visible control (CLAUDE.md "Keyboard").
- *
- * Segments are separate labels so the border line shows between them. On narrow
- * screens it collapses to path + controls (docs/PROJECT.md §3).
- *
- * `message` is a transient echo like "yanked idrewlong@gmail.com". It replaces
- * the hint text and is announced politely so it isn't missed by screen readers.
+ * for the click equivalents of the global shortcuts.
  */
 defineProps<{
-  /** Current location, e.g. `~/experience`. */
   path: string
-  /** Transient confirmation, or '' for none. */
   message?: string
   theme: Theme
+  mode: string
 }>()
 
-defineEmits<{ help: [], 'cycle-theme': [] }>()
+defineEmits<{
+  help: []
+  'cycle-theme': []
+  palette: []
+  find: []
+  compose: []
+}>()
 </script>
 
 <template>
   <div class="frame__bar status">
     <span class="frame__label status__where">
-      <span class="status__mode" aria-hidden="true">NORMAL</span>
+      <span class="status__mode" aria-hidden="true">{{ mode }}</span>
       <span class="status__path">{{ path }}</span>
     </span>
 
@@ -35,12 +33,11 @@ defineEmits<{ help: [], 'cycle-theme': [] }>()
 
     <span v-if="message" class="frame__label status__message">{{ message }}</span>
     <span v-else class="frame__label status__hint" aria-hidden="true">
-      1-4 switch · j/k scroll · ? help
+      1-4 switch · : commands · / find · ? help
     </span>
 
     <span class="frame__gap" aria-hidden="true" />
 
-    <!-- Live region kept in the DOM at all times so updates are announced. -->
     <span class="visually-hidden" role="status" aria-live="polite">{{ message }}</span>
 
     <span class="frame__label status__controls">
@@ -51,6 +48,21 @@ defineEmits<{ help: [], 'cycle-theme': [] }>()
       >
         <span aria-hidden="true">◑</span>
         <span class="visually-hidden">Next colour theme (current: {{ theme }})</span>
+      </button>
+
+      <button type="button" class="status__btn js-only" @click="$emit('palette')">
+        <span aria-hidden="true">:</span>
+        <span class="visually-hidden">Command palette</span>
+      </button>
+
+      <button type="button" class="status__btn js-only" @click="$emit('find')">
+        <span aria-hidden="true">/</span>
+        <span class="visually-hidden">Find in page</span>
+      </button>
+
+      <button type="button" class="status__btn js-only" @click="$emit('compose')">
+        <span aria-hidden="true">m</span>
+        <span class="visually-hidden">Compose email</span>
       </button>
 
       <button type="button" class="status__btn js-only" @click="$emit('help')">
@@ -88,7 +100,6 @@ defineEmits<{ help: [], 'cycle-theme': [] }>()
   text-overflow: ellipsis;
 }
 
-/* WCAG 2.2 target size: at least 24x24px, which fits inside the 2rem bar. */
 .status__btn {
   display: inline-flex;
   align-items: center;
@@ -101,7 +112,6 @@ defineEmits<{ help: [], 'cycle-theme': [] }>()
 }
 .status__btn:hover { color: var(--fg); }
 
-/* Narrow: keep the path and the controls, drop the decoration. */
 .status__mode,
 .status__hint,
 .status__location { display: none; }

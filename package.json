@@ -11,8 +11,9 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "generate": "node scripts/generate-themes.mjs && nuxt generate && node scripts/finalize-static.mjs",
+    "generate": "node scripts/fetch-github.mjs && node scripts/generate-themes.mjs && nuxt generate && node scripts/finalize-static.mjs",
     "generate-themes": "node scripts/generate-themes.mjs",
+    "fetch-github": "node scripts/fetch-github.mjs",
     "lighthouse": "lhci autorun",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

@@ -24,6 +24,12 @@ export type ShortcutAction =
   | 'theme:toggle'
   | 'help:toggle'
   | 'overlay:close'
+  | 'palette:open'
+  | 'find:open'
+  | 'find:next'
+  | 'find:prev'
+  | 'card:copy'
+  | 'compose:open'
 
 export type ShortcutGroup = 'navigation' | 'movement' | 'actions'
 
@@ -51,10 +57,16 @@ export const shortcuts: Shortcut[] = [
   { keys: ['Enter'], action: 'list:open', label: 'Enter', description: 'Open or expand the selected row', group: 'movement' },
   { keys: ['g'], action: 'scroll:top', label: 'g', description: 'Jump to top', group: 'movement' },
   { keys: ['G'], action: 'scroll:bottom', label: 'G', description: 'Jump to bottom', group: 'movement' },
+  { keys: ['n'], action: 'find:next', label: 'n', description: 'Next find match', group: 'movement' },
+  { keys: ['N'], action: 'find:prev', label: 'N', description: 'Previous find match', group: 'movement' },
 
   { keys: ['f'], action: 'projects:filter', label: 'f', description: 'Cycle the project filter', group: 'actions' },
   { keys: ['r'], action: 'resume:open', label: 'r', description: 'Open the resume PDF', group: 'actions' },
   { keys: ['y'], action: 'email:copy', label: 'y', description: 'Copy email address', group: 'actions' },
+  { keys: ['Y'], action: 'card:copy', label: 'Y', description: 'Copy recruiter card', group: 'actions' },
+  { keys: ['m'], action: 'compose:open', label: 'm', description: 'Compose email', group: 'actions' },
+  { keys: [':'], action: 'palette:open', label: ':', description: 'Command palette', group: 'actions' },
+  { keys: ['/'], action: 'find:open', label: '/', description: 'Find in page', group: 'actions' },
   { keys: ['t'], action: 'theme:toggle', label: 't', description: 'Cycle theme', group: 'actions' },
   { keys: ['?'], action: 'help:toggle', label: '?', description: 'Show this help', group: 'actions' },
   { keys: ['Escape'], action: 'overlay:close', label: 'Esc', description: 'Close overlay or collapse', group: 'actions' },

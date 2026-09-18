@@ -83,6 +83,8 @@ export interface Project {
   }
   /** `writing` rows show a date instead of tags. ISO `YYYY-MM-DD`. */
   published?: string
+  /** Optional asciinema v2 recording, e.g. `/casts/shrinkr.cast`. */
+  cast?: string
 }
 
 export interface SkillGroup {

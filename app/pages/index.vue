@@ -3,11 +3,17 @@ import { profile } from '~/data/profile'
 import { tabs } from '~/data/navigation'
 import { useClipboard } from '~/composables/useClipboard'
 import { useStatusLine } from '~/composables/useStatusLine'
+import { useOverlay } from '~/composables/useOverlay'
+import { useYankContext } from '~/composables/useYankContext'
+import { formatRecruiterCard } from '~/utils/recruiter-card'
 import { track } from '~/utils/analytics'
 
 const tab = tabs[0]!
 const { copy } = useClipboard()
 const { flash } = useStatusLine()
+const overlay = useOverlay()
+const yank = useYankContext()
+const config = useRuntimeConfig()
 
 const title = `${profile.name} — ${profile.role}`
 const description = `${profile.role} at ${profile.employer} in ${profile.location}. `
@@ -44,6 +50,16 @@ async function copyEmail(value: string) {
   const ok = await copy(value)
   flash(ok ? `yanked ${value}` : `could not copy ${value}`)
 }
+
+async function copyCard() {
+  const extra = yank.resolve()
+  const text = formatRecruiterCard({
+    siteUrl: String(config.public.siteUrl),
+    ...extra,
+  })
+  const ok = await copy(text)
+  flash(ok ? 'yanked recruiter card' : 'could not copy')
+}
 </script>
 
 <template>
@@ -78,7 +94,20 @@ async function copyEmail(value: string) {
       </div>
     </div>
 
+    <button type="button" class="copy js-only card-copy" @click="copyCard">
+      copy card<span class="visually-hidden"> as markdown</span>
+    </button>
+    <button type="button" class="copy js-only card-copy" @click="overlay.open('compose')">
+      write<span class="visually-hidden"> an email</span>
+    </button>
+
     <div class="actions">
+      <button type="button" class="btn js-only" @click="overlay.open('pager', 'man')">
+        [ man idrew ]
+      </button>
+      <button type="button" class="btn js-only" @click="overlay.open('pager', 'less')">
+        [ Read resume ]
+      </button>
       <a
         class="btn btn--primary"
         :href="profile.resumeUrl"
@@ -88,8 +117,18 @@ async function copyEmail(value: string) {
       >
         [ Download resume ]<span class="visually-hidden"> (PDF, opens in a new tab)</span>
       </a>
+      <a class="btn" href="/resume.txt">[ resume.txt ]</a>
       <NuxtLink class="btn" to="/projects">[ See projects ]</NuxtLink>
     </div>
+
+    <details id="man" class="fold no-js-only">
+      <summary>[ man idrew ]</summary>
+      <ViewsManPage />
+    </details>
+    <details id="resume" class="fold no-js-only">
+      <summary>[ Read resume ]</summary>
+      <ViewsResumeDoc />
+    </details>
   </div>
 </template>
 
@@ -114,6 +153,8 @@ async function copyEmail(value: string) {
 }
 .copy:hover { color: var(--accent); }
 
+.card-copy { margin-top: 0.5rem; }
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -122,12 +163,16 @@ async function copyEmail(value: string) {
   justify-content: flex-end;
 }
 
+.fold { margin-top: 1.5rem; }
+.fold summary { cursor: pointer; color: var(--accent); }
+
 .btn {
   border: 1px solid var(--line);
   border-radius: 2px;
   padding: 0.35rem 1ch;
   color: var(--fg);
   text-decoration: none;
+  min-height: 1.5rem;
 }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
 
