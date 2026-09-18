@@ -35,13 +35,25 @@ describe('generated themes', () => {
   })
 
   // The guard. Omarchy's palettes fail AA as-authored; the generator must fix them.
+  // `surfaceHi` is the opaque highlight background used behind selected/hovered
+  // rows (Defect 1) — every text token must clear AA there too, or a future
+  // highlight regresses contrast the same way the translucent color-mix() did.
   it.each(themes.map(t => [t.name, t] as const))(
-    '%s meets WCAG AA for every text token on both surfaces',
+    '%s meets WCAG AA for every text token on bg, surface, and surface-hi',
     (_name, theme) => {
       for (const token of TEXT_TOKENS) {
         expect(contrast(theme.tokens[token], theme.tokens.bg)).toBeGreaterThanOrEqual(4.5)
         expect(contrast(theme.tokens[token], theme.tokens.surface)).toBeGreaterThanOrEqual(4.5)
+        expect(contrast(theme.tokens[token], theme.tokens.surfaceHi)).toBeGreaterThanOrEqual(4.5)
       }
+    },
+  )
+
+  it.each(themes.map(t => [t.name, t] as const))(
+    '%s emits an opaque surface-hi distinct from surface',
+    (_name, theme) => {
+      expect(theme.tokens.surfaceHi).toMatch(/^#[0-9A-Fa-f]{6}$/)
+      expect(theme.tokens.surfaceHi).not.toBe(theme.tokens.surface)
     },
   )
 

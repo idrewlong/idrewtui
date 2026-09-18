@@ -24,6 +24,7 @@
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
+  --color-surface-hi: var(--surface-hi);
   --color-line: var(--line);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
