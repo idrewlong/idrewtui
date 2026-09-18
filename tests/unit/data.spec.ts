@@ -110,6 +110,18 @@ describe('skills', () => {
     }
   })
 
+  it('has a design group with exactly Figma and Adobe Creative Suite', () => {
+    const design = skillGroups.find(g => g.label === 'design')
+    expect(design?.items).toEqual(['Figma', 'Adobe Creative Suite'])
+  })
+
+  it('lists Git under infra and VSCode under tools', () => {
+    const infra = skillGroups.find(g => g.label === 'infra')
+    const tools = skillGroups.find(g => g.label === 'tools')
+    expect(infra?.items).toContain('Git')
+    expect(tools?.items).toContain('VSCode')
+  })
+
   it('only links certifications that are actually earned', () => {
     // Nothing is presented as credentialed until the data says so.
     for (const cert of certifications) {
@@ -123,6 +135,13 @@ describe('skills', () => {
       expect(entry.credential.length).toBeGreaterThan(0)
       expect(Array.isArray(entry.honors)).toBe(true)
     }
+  })
+
+  it('credits the Lens Collective Program and Hall of Fame honours', () => {
+    const oleMiss = education.find(e => e.institution === 'University of Mississippi')
+    const delta = education.find(e => e.institution === 'Mississippi Delta Community College')
+    expect(oleMiss?.honors).toContain('Lens Collective Program')
+    expect(delta?.honors).toContain('Hall of Fame')
   })
 })
 

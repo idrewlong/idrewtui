@@ -16,15 +16,19 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     label: 'infra',
-    items: ['AWS', 'DigitalOcean', 'WP Engine', 'Cloudflare', 'Docker', 'CI/CD'],
+    items: ['AWS', 'DigitalOcean', 'WP Engine', 'Cloudflare', 'Docker', 'CI/CD', 'Git'],
   },
   {
     label: 'analytics',
     items: ['GTM', 'GA4', 'Search Console', 'SEMrush'],
   },
   {
+    label: 'design',
+    items: ['Figma', 'Adobe Creative Suite'],
+  },
+  {
     label: 'tools',
-    items: ['Claude Code', 'Cursor', 'Postman', 'Jira', 'Salesforce', 'Twilio'],
+    items: ['Claude Code', 'Cursor', 'VSCode', 'Postman', 'Jira', 'Salesforce', 'Twilio'],
   },
 ]
 
@@ -45,11 +49,11 @@ export const education: EducationEntry[] = [
     // photojournalism is also part of the background. Which should this state?
     // (docs/PROJECT.md §10)
     credential: 'B.A.',
-    honors: ['Lyceum Scholar', "Chancellor's Leadership Class"],
+    honors: ['Lyceum Scholar', "Chancellor's Leadership Class", 'Lens Collective Program'],
   },
   {
     institution: 'Mississippi Delta Community College',
     credential: 'A.A. Pre-Engineering',
-    honors: ['Phi Theta Kappa President', 'NASA Scholar'],
+    honors: ['Phi Theta Kappa President', 'NASA Scholar', 'Hall of Fame'],
   },
 ]
