@@ -186,7 +186,7 @@ function groupLabel(group: 'jump' | 'actions' | 'themes') {
 }
 .row:hover,
 .row[data-selected="true"] {
-  background: color-mix(in srgb, var(--line) 45%, transparent);
+  background: var(--surface-hi);
   color: var(--accent);
 }
 </style>

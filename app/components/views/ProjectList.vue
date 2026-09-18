@@ -259,7 +259,7 @@ defineExpose({
 .row::-webkit-details-marker { display: none; }
 .row:hover,
 .row[data-selected="true"] {
-  background: color-mix(in srgb, var(--line) 35%, transparent);
+  background: var(--surface-hi);
 }
 .row:hover .row__name,
 .row[data-selected="true"] .row__name { color: var(--accent); }

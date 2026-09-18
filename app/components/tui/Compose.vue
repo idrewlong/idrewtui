@@ -123,5 +123,5 @@ textarea {
   min-height: 1.5rem;
   text-decoration: none;
 }
-.send:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.send:hover { background: var(--surface-hi); }
 </style>
